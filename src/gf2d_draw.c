@@ -59,6 +59,21 @@ void gf2d_draw_rect(SDL_Rect rect,Vector4D color)
                            255);
 }
 
+void gf2d_draw_fill_rect(SDL_Rect rect,Vector4D color)
+{
+  SDL_SetRenderDrawColor(gf2d_graphics_get_renderer(),
+                          color.x,
+                          color.y,
+                          color.z,
+                          color.w);
+  SDL_RenderFillRect(gf2d_graphics_get_renderer(),(const struct SDL_Rect *)&rect);
+  SDL_SetRenderDrawColor(gf2d_graphics_get_renderer(),
+                         255,
+                         255,
+                         255,
+                         255);
+}
+
 void gf2d_draw_rects(SDL_Rect *rects,Uint32 count,Vector4D color)
 {
     SDL_SetRenderDrawColor(gf2d_graphics_get_renderer(),
@@ -99,7 +114,7 @@ void gf2d_draw_pixel_list(SDL_Point * pixels,Uint32 count,Vector4D color)
  */
 
 static int gf2d_draw_circle_points(SDL_Point *p,Vector2D center, Vector2D point)
-{  
+{
   if (point.x == 0)
   {
     vector2d_set(p[0],center.x, center.y + point.y);
@@ -131,6 +146,7 @@ static int gf2d_draw_circle_points(SDL_Point *p,Vector2D center, Vector2D point)
   return 0;
 }
 
+
 void gf2d_draw_circle(Vector2D center, int radius, Vector4D color)
 {
     SDL_Point *pointArray;
@@ -139,6 +155,7 @@ void gf2d_draw_circle(Vector2D center, int radius, Vector4D color)
     int p = (5 - radius*4)/4;
     point.y = radius;
     pointArray = (SDL_Point*)malloc(sizeof(SDL_Point)*radius*8);
+
     if (!pointArray)
     {
         slog("gf2d_draw_circle: failed to allocate points for circle drawing");
@@ -178,5 +195,109 @@ void gf2d_draw_circle(Vector2D center, int radius, Vector4D color)
     free(pointArray);
 }
 
+
+PointL * gf2d_draw_rectangle(int w,int h,int x_pos, int y_pos)
+{
+  SDL_Point * pointArray;
+  PointL * pl;
+  int size,area;
+  size = 2*w+2*h;
+  area = w*h;
+  pointArray = (SDL_Point *)malloc(sizeof(SDL_Point)*size);
+  int i,count;
+  count = 0;
+  for(i = x_pos; i <x_pos+w;i++)
+  {
+    pointArray[count].y = y_pos;
+    pointArray[count].x = i;
+    count = count+1;
+    pointArray[count].y = y_pos+h-1;
+    pointArray[count].x = i;
+    count = count +1;
+  }
+  for(i = y_pos;i<y_pos+h;i++)
+  {
+      pointArray[count].y = i;
+      pointArray[count].x = x_pos;
+      count = count +1;
+      pointArray[count].y = i;
+      pointArray[count].x = x_pos+w;
+      count = count +1;
+  }
+  pl = (PointL *) malloc(sizeof(PointL));
+  pl->pointList = pointArray;
+  pl->size = area;
+  pl->count = count-1;
+  return pl;
+
+}
+
+PointL * gf2d_draw_fill_polygon(PointL *p,int area)
+{
+  SDL_Point *fillArray,*pointArray;
+  PointL * pl;
+  int i,j,count,size;
+  int * x_max,*x_min;
+
+  pointArray =  p->pointList;
+  size = p->count;
+  x_max = (int *)malloc(sizeof(int)*2400);
+  x_min = (int*)malloc(sizeof(int)*2400);
+  memset(x_max,0,sizeof(int)*2400);
+  memset(x_min,2400,sizeof(int)*2400);
+
+  gf2d_insertion_sort_point(pointArray,size,x_max,x_min);
+  int minY = pointArray[0].y;
+  int maxY = pointArray[size-1].y;
+  //slog("the min y is %d and the max y is %d",minY,maxY);
+  fillArray = (SDL_Point*)malloc(sizeof(SDL_Point)*area);
+  count = 0;
+  for(i = minY;i<=maxY;i++)
+  {
+    for(j=x_min[i];j<x_max[i];j++)
+    {
+      fillArray[count].x = (int)j;
+      fillArray[count].y = (int)i;
+      count = count +1;
+      //slog("fillArray x is %d fillArray y is %d",j,i);
+      //slog("fillArray x is %d fillArray y is %d",fillArray[count-1].x,fillArray[count-1].y);
+    }
+  }
+
+  free(x_max);
+  free(x_min);
+  pl = (PointL *) malloc(sizeof(PointL));
+  pl->pointList = fillArray;
+  pl->count = count -1;
+  pl->size = area;
+
+  return pl;
+}
+
+PointL gf2d_draw_point_list_delete(PointL *p)
+{
+  free(p->pointList);
+  free(p);
+}
+
+void gf2d_draw_point_list(PointL * pointList)
+{
+  SDL_SetRenderDrawColor(gf2d_graphics_get_renderer(),
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    255);
+SDL_RenderDrawPoints(gf2d_graphics_get_renderer(),pointList->pointList,pointList->count);
+SDL_SetRenderDrawColor(gf2d_graphics_get_renderer(),
+                        255,
+                        255,
+                        255,
+                        255);
+}
+
+int gf2d_draw_compare_points(void *point1,void *point2)
+{
+  return ((SDL_Point*)point1)->y > ((SDL_Point*)point2)->y;
+}
 
 /*eol@eof*/
