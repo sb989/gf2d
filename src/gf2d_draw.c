@@ -94,6 +94,12 @@ void gf2d_draw_pixel(Vector2D pixel,Vector4D color)
     SDL_RenderDrawPoint(gf2d_graphics_get_renderer(),
                         pixel.x,
                         pixel.y);
+
+    SDL_SetRenderDrawColor(gf2d_graphics_get_renderer(),
+                           255,
+                           255,
+                           255,
+                           255);
 }
 
 void gf2d_draw_pixel_list(SDL_Point * pixels,Uint32 count,Vector4D color)
@@ -270,11 +276,11 @@ PointL * gf2d_draw_fill_polygon(PointL *p,int area)
   pl->pointList = fillArray;
   pl->count = count -1;
   pl->size = area;
-
+  //gf2d_draw_point_list_delete(p);
   return pl;
 }
 
-PointL gf2d_draw_point_list_delete(PointL *p)
+void gf2d_draw_point_list_delete(PointL *p)
 {
   free(p->pointList);
   free(p);
