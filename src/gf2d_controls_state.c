@@ -10,7 +10,7 @@ typedef struct
   const Uint8 * keys;
 }ControlsManager;
 
-ControlsManager cManager = {0};
+static ControlsManager cManager = {0};
 
 void gf2d_controls_manager_init()
 {

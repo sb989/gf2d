@@ -9,7 +9,7 @@ typedef struct
 }TileMapManager;
 
 
-TileMapManager mapManager = {0};
+static TileMapManager mapManager = {0};
 
 void gf2d_tilemap_init_manager(int resx,int resy)
 {
@@ -64,6 +64,6 @@ void gf2d_tilemap_draw(int x)
 {
   TileMap * t = mapManager.tileArray[x];
   Vector2D scale = vector2d(40/(t->sprite->frame_w),40/(t->sprite->frame_h));
-  gf2d_sprite_draw(t->sprite,t->pos,&scale,NULL,NULL,NULL,NULL,t->frame);
+  gf2d_sprite_draw(t->sprite,t->pos,&scale,NULL,NULL,NULL,NULL,NULL,t->frame);
 
 }

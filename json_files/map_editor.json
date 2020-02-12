@@ -1,0 +1,15 @@
+{
+  "sprites":[
+    {"file_location":"images/Spritesheet/greySheet.png",
+      "posx":"0",
+      "posy":"0",
+      "xml_tagname":"grey_button05.png",
+      "resize":"yes",
+      "resizex":"2",
+      "resizey":"1"
+
+    }
+
+  ]
+
+}

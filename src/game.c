@@ -8,7 +8,7 @@
 #include "gf2d_entity.h"
 #include "gf2d_tilemap.h"
 #include "gf2d_controls_state.h"
-
+#include "gf2d_level_editor.h"
 int main(int argc, char * argv[])
 {
     /*variable declarations*/
@@ -28,7 +28,7 @@ int main(int argc, char * argv[])
     SDL_ShowCursor(SDL_DISABLE);
     gf2d_entity_init_manager();
     gf2d_controls_manager_init();
-
+    gf2d_level_editor_init();
 
     gf2d_tilemap_init_manager(resx,resy);
     tile = gf2d_sprite_load_all("images/tilemap_packed.png",16,16,27);

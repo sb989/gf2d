@@ -16,7 +16,7 @@ typedef struct Sprite_S
 }Sprite;
 
 /**
- * @brief initializes the sprite manager 
+ * @brief initializes the sprite manager
  * @param max the maximum number of sprites the system will handle at once
  */
 void gf2d_sprite_init(Uint32 max);
@@ -65,6 +65,7 @@ void gf2d_sprite_draw(
     Vector2D position,
     Vector2D * scale,
     Vector2D * scaleCenter,
+    Vector4D * xyOffset,
     Vector3D * rotation,
     Vector2D * flip,
     Vector4D * colorShift,

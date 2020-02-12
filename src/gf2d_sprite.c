@@ -53,7 +53,7 @@ void gf2d_sprite_delete(Sprite *sprite)
     if (sprite->texture != NULL)
     {
         SDL_DestroyTexture(sprite->texture);
-    }    
+    }
     memset(sprite,0,sizeof(Sprite));//clean up all other data
 }
 
@@ -125,7 +125,7 @@ Sprite *gf2d_sprite_load_all(
 {
     SDL_Surface *surface = NULL;
     Sprite *sprite = NULL;
-    
+
     sprite = gf2d_sprite_get_by_filename(filename);
     if (sprite != NULL)
     {
@@ -133,13 +133,13 @@ Sprite *gf2d_sprite_load_all(
         sprite->ref_count++;
         return sprite;
     }
-    
+
     sprite = gf2d_sprite_new();
     if (!sprite)
     {
         return NULL;
     }
-    
+
     surface = IMG_Load(filename);
     if (!surface)
     {
@@ -155,7 +155,7 @@ Sprite *gf2d_sprite_load_all(
         gf2d_sprite_free(sprite);
         return NULL;
     }
-    
+
     sprite->texture = SDL_CreateTextureFromSurface(gf2d_graphics_get_renderer(),surface);
     if (!sprite->texture)
     {
@@ -164,7 +164,7 @@ Sprite *gf2d_sprite_load_all(
         SDL_FreeSurface(surface);
         return NULL;
     }
-    SDL_SetTextureBlendMode(sprite->texture,SDL_BLENDMODE_BLEND);        
+    SDL_SetTextureBlendMode(sprite->texture,SDL_BLENDMODE_BLEND);
     SDL_UpdateTexture(sprite->texture,
                     NULL,
                     surface->pixels,
@@ -196,6 +196,7 @@ void gf2d_sprite_draw_image(Sprite *image,Vector2D position)
         NULL,
         NULL,
         NULL,
+        NULL,
         0);
 }
 
@@ -204,6 +205,7 @@ void gf2d_sprite_draw(
     Vector2D position,
     Vector2D * scale,
     Vector2D * scaleCenter,
+    Vector4D * xyOffset,
     Vector3D * rotation,
     Vector2D * flip,
     Vector4D * colorShift,
@@ -212,14 +214,18 @@ void gf2d_sprite_draw(
     SDL_Rect cell,target;
     SDL_RendererFlip flipFlags = SDL_FLIP_NONE;
     SDL_Point r;
-    int fpl;
+    int fpl,xBegin,yBegin,xWidth,yHeight;
     Vector2D scaleFactor = {1,1};
     Vector2D scaleOffset = {0,0};
     if (!sprite)
     {
         return;
     }
-    
+    if(xyOffset && frame>0)
+    {
+        slog("frame must be 0 and frames per line must be 1 when using xyOffset");
+        return;
+    }
     if (scale)
     {
         vector2d_copy(scaleFactor,(*scale));
@@ -250,14 +256,25 @@ void gf2d_sprite_draw(
             sprite->texture,
             colorShift->w);
     }
-    
+
     fpl = (sprite->frames_per_line)?sprite->frames_per_line:1;
+    xBegin = (xyOffset)?(int)xyOffset->x:0;
+    yBegin = (xyOffset)?(int)xyOffset->y:0;
+    xWidth = (xyOffset)?(int)xyOffset->z:sprite->frame_w;
+    yHeight = (xyOffset)?(int)xyOffset->w:sprite->frame_h;
     gfc_rect_set(
         cell,
         frame%fpl * sprite->frame_w,
         frame/fpl * sprite->frame_h,
         sprite->frame_w,
         sprite->frame_h);
+    gfc_rect_set(
+        cell,
+        xBegin,
+        yBegin,
+        xWidth,
+        yHeight
+    );
     gfc_rect_set(
         target,
         position.x - (scaleFactor.x * scaleOffset.x),

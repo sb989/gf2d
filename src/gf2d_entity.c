@@ -66,7 +66,7 @@ void gf2d_entity_manager_insert(Entity *e)
 void gf2d_entity_animate(Entity *e)
 {
 
-  gf2d_sprite_draw(e->s,e->position,NULL,NULL,NULL,NULL,NULL,e->frame);
+  gf2d_sprite_draw(e->s,e->position,NULL,NULL,NULL,NULL,NULL,NULL,e->frame);
   e->frame +=.1;
 
 }
