@@ -3,12 +3,15 @@
 #include "gf2d_sprite.h"
 #include "gfc_vector.h"
 #include "simple_logger.h"
-
+#include "../Chipmunk-7.0.3/include/chipmunk/chipmunk.h"
+#include "gf2d_physics.h"
 typedef struct Entity_S{
   char * name;
   Sprite * s;
   Uint8 _inuse;
   float frame;
+  cpBody * body;
+  cpShape * shape;
   //void (*think) (struct Entity_S self);
   void (*update) ( struct Entity_S * self);
   Vector2D position;

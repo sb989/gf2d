@@ -19,5 +19,6 @@ TileMap * gf2d_tilemap_insert(Sprite * s,int frame,Vector2D pos);
 TileMap * gf2d_tilemap_new(Sprite * s,int frame,Vector2D pos);
 void gf2d_tilemap_draw_all();
 void gf2d_tilemap_draw(int x);
+void gf2d_tilemap_close();
 
 #endif

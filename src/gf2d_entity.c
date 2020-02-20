@@ -29,9 +29,18 @@ Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos)
     return NULL;
   }
   Entity * temp = (Entity *)malloc(sizeof(Entity));
+  Uint8 CollisionType = 0;
   temp->name = name;
   temp->s = s;
   temp->position = pos;
+  cpFloat length,width,radius;
+  length = s->frame_h;
+  width = s->frame_w;
+  radius = 0;
+  temp->shape = gf2d_physics_add_square_body(length,width,radius,0);
+  temp->body = cpShapeGetBody(temp->shape);
+  cpShapeSetCollisionType(temp->shape,CollisionType);
+  cpBodySetUserData(temp->body,temp);
   gf2d_entity_manager_insert(temp);
   return temp;
 }

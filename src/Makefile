@@ -13,14 +13,16 @@
 PROJECT = gf2d
 CC      = gcc
 
-LIB_LIST = ../gfc/libs/libgfc.a ../gfc/simple_json/libs/libsj.a ../gfc/simple_logger/libs/libsl.a 
+LIB_LIST = ../gfc/libs/libgfc.a ../gfc/simple_json/libs/libsj.a ../gfc/simple_logger/libs/libsl.a ../Chipmunk-7.0.3/src/libchipmunk.a
 OBJECTS = $(patsubst %.c,%.o,$(wildcard *.c))
 
-INC_PATHS = ../include ../gfc/include ../gfc/simple_logger/include ../gfc/simple_json/include
+INC_PATHS = ../include ../gfc/include ../gfc/simple_logger/include ../gfc/simple_json/include ../Chipmunk-7.0.3/include ../Chipmunk-7.0.3/demo ../Chipmunk-7.0.3/demo/sokol
 INC_PARAMS =$(foreach d, $(INC_PATHS), -I$d)
 
 OBJECTS = $(patsubst %.c,%.o,$(wildcard *.c))
 
+GTK_CFLAGS = `pkg-config --cflags gtk+-3.0`
+GTK_LDFLAGS = `pkg-config --libs gtk+-3.0`
 SDL_CFLAGS = `sdl2-config --cflags` $(INC_PARAMS)
 SDL_LDFLAGS = `sdl2-config --libs` -lSDL2_image -lpng -ljpeg -lz -lm
 LFLAGS = -g  -o ../$(PROJECT)
@@ -33,7 +35,7 @@ DOXYGEN = doxygen
 #
 
 $(PROJECT): $(OBJECTS)
-	$(CC) $(OBJECTS) $(LFLAGS) $(LIB_LIST) $(SDL_LDFLAGS) 
+	$(CC) $(OBJECTS) $(LFLAGS) $(LIB_LIST) $(SDL_LDFLAGS) $(GTK_LDFLAGS) 
 
 docs:
 	$(DOXYGEN) doxygen.cfg
@@ -68,6 +70,6 @@ include makefile.dep
 #
 
 .c.o:
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(GTK_CFLAGS) -c $<
 
 

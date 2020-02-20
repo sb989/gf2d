@@ -23,6 +23,7 @@ void gf2d_tilemap_init_manager(int resx,int resy)
   mapManager.xcount = 0;
   mapManager.resx = resx;
   mapManager.resy = resy;
+  atexit(gf2d_tilemap_close);
 }
 
 TileMap * gf2d_tilemap_insert(Sprite * s,int frame,Vector2D pos)
@@ -42,7 +43,7 @@ TileMap * gf2d_tilemap_new(Sprite * s,int frame,Vector2D pos)
 {
   if(mapManager.xcount == mapManager.xsize )
   {
-    slog("tilemap full cannot create new tilemap");
+    slog("tilemap full. cannot create new tilemap");
     return NULL;
   }
 
@@ -55,7 +56,7 @@ void gf2d_tilemap_draw_all()
   for(x=0; x<mapManager.xcount; x++)
   {
     gf2d_tilemap_draw(x);
-    slog("x is %d",x);
+    //slog("x is %d",x);
   }
 }
 
@@ -63,7 +64,17 @@ void gf2d_tilemap_draw_all()
 void gf2d_tilemap_draw(int x)
 {
   TileMap * t = mapManager.tileArray[x];
-  Vector2D scale = vector2d(40/(t->sprite->frame_w),40/(t->sprite->frame_h));
+  float scalex = 40.0/(float)t->sprite->frame_w;
+  float scaley = 40.0/(float)t->sprite->frame_h;
+  Vector2D scale = vector2d(scalex,scaley);
+  //slog("scale x is %f scale y is %f",scale.x,scale.y);
   gf2d_sprite_draw(t->sprite,t->pos,&scale,NULL,NULL,NULL,NULL,NULL,t->frame);
+
+}
+
+void gf2d_tilemap_close()
+{
+
+  free(mapManager.tileArray);
 
 }

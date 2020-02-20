@@ -17,7 +17,7 @@ typedef struct
     Uint32 now;
     Uint32 then;
     Bool print_fps;
-    float fps; 
+    float fps;
 
     Uint32 background_color;
     Vector4D background_color_v;
@@ -75,7 +75,7 @@ void gf2d_graphics_initialize(
         gf2d_graphics_close();
         return;
     }
-    
+
     gf2d_graphics.renderer = SDL_CreateRenderer(gf2d_graphics.main_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
     if (!gf2d_graphics.renderer)
     {
@@ -83,7 +83,7 @@ void gf2d_graphics_initialize(
         gf2d_graphics_close();
         return;
     }
-    
+
     SDL_SetRenderDrawColor(gf2d_graphics.renderer, 0, 0, 0, 255);
     SDL_RenderClear(gf2d_graphics.renderer);
     SDL_RenderPresent(gf2d_graphics.renderer);
@@ -101,7 +101,7 @@ void gf2d_graphics_initialize(
         gf2d_graphics_close();
         return;
     }
-    
+
     SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ARGB8888,
                                     &gf2d_graphics.bitdepth,
                                     &gf2d_graphics.rmask,
@@ -109,20 +109,20 @@ void gf2d_graphics_initialize(
                                     &gf2d_graphics.bmask,
                                     &gf2d_graphics.amask);
 
-    
+
     gf2d_graphics.surface = SDL_CreateRGBSurface(0, renderWidth, renderHeight, gf2d_graphics.bitdepth,
                                         gf2d_graphics.rmask,
                                     gf2d_graphics.gmask,
                                     gf2d_graphics.bmask,
                                     gf2d_graphics.amask);
-    
+
     if (!gf2d_graphics.surface)
     {
         slog("failed to create screen surface: %s",SDL_GetError());
         gf2d_graphics_close();
         return;
     }
-    
+
     gf2d_graphics.background_color = SDL_MapRGB(gf2d_graphics.surface->format, bgcolor.x,bgcolor.y,bgcolor.z);
     vector4d_set(gf2d_graphics.background_color_v,bgcolor.x,bgcolor.y,bgcolor.z,bgcolor.w);
     SDL_SetRenderDrawBlendMode(gf2d_graphics_get_renderer(),SDL_BLENDMODE_BLEND);
@@ -293,6 +293,11 @@ SDL_Surface *gf2d_graphics_screen_convert(SDL_Surface **surface)
     SDL_FreeSurface(*surface);
     *surface = NULL;
     return convert;
+}
+
+SDL_Window * gf2d_graphics_get_window()
+{
+  return gf2d_graphics.main_window;
 }
 
 /*eol@eof*/

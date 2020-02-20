@@ -8,14 +8,16 @@
 #include "gf2d_entity.h"
 #include "gf2d_tilemap.h"
 #include "gf2d_controls_state.h"
-#include "gf2d_level_editor.h"
+#include "gf2d_ui_box.h"
+#include "gf2d_gtk.h"
+#include "gf2d_ui.h"
 int main(int argc, char * argv[])
 {
     /*variable declarations*/
     int done = 0;
 
-    Sprite * tile;
-    int resx,resy;
+    Sprite * tile,*mouse;
+    int resx,resy,count;
     resx = 1080;
     resy = 720;
 
@@ -26,14 +28,19 @@ int main(int argc, char * argv[])
     gf2d_graphics_set_frame_delay(16);
     gf2d_sprite_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
-    gf2d_entity_init_manager();
+
+    //gf2d_file_directory_open(argc,argv);
+
     gf2d_controls_manager_init();
-    gf2d_level_editor_init();
-
+    gf2d_physics_init();
+    gf2d_ui_init();
     gf2d_tilemap_init_manager(resx,resy);
+    gf2d_entity_init_manager();
+    gf2d_ui_load("json_files/map_editor.json");
     tile = gf2d_sprite_load_all("images/tilemap_packed.png",16,16,27);
-    gf2d_tilemap_new(tile,28,vector2d(00,00));
-
+    for(count =0;count<1080;count=count+40)
+      gf2d_tilemap_new(tile,28,vector2d(count,00));
+    mouse = gf2d_sprite_load_image("images/cursor_pointer3D.png");
 
     /*main game loop*/
     while(!done)
@@ -45,10 +52,11 @@ int main(int argc, char * argv[])
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame
         //backgrounds drawn first
-        gf2d_tilemap_draw_all();
+
+        //gf2d_tilemap_draw_all();
+        gf2d_ui_draw();
         gf2d_entity_update_all();
-
-
+        gf2d_sprite_draw_image(mouse,gf2d_mouse_pos());
         gf2d_grahics_next_frame();// render current draw frame and skip to the next frame
 
         if (gf2d_key_pressed(SDL_SCANCODE_ESCAPE))done = 1; // exit condition
