@@ -5,13 +5,15 @@ typedef struct
   List *buttons;
 }UIButtonAssets;
 
-UIButtonAssets uba = {0};
+static UIButtonAssets uba = {0};
+static int buttCount = 0;
 
 void gf2d_ui_button_init()
 {
   uba.buttons = gfc_list_new();
   atexit(gf2d_ui_button_close);
 }
+
 
 void gf2d_ui_button_load_buttons(SJson * buttons)
 {
@@ -27,19 +29,29 @@ void gf2d_ui_button_load_buttons(SJson * buttons)
     if(!temp) continue;
     tbi = gf2d_ui_button_new();
     image_or_rect = gf2d_ui_helper_functions_get_object_value_as_string(temp,"image_or_rect");
-    if(strcmp(image_or_rect,"image")==0)
+    if(strcmp(image_or_rect,"image_uneven")==0)
     {
-      bi = gf2d_ui_box_info_image(temp);
+      bi = gf2d_ui_box_info_image_uneven(temp);
       tbi->boxInfo = bi;
       gf2d_ui_button_sprite_init(temp,tbi);
+      gf2d_ui_button_set_func_name(temp,tbi);
+      gf2d_ui_button_setup_collision_body(tbi);
+    }
+    else if(strcmp(image_or_rect,"image_even")==0)
+    {
+      bi = gf2d_ui_box_info_image_even(temp);
+      tbi->boxInfo = bi;
+      gf2d_ui_button_sprite_init(temp,tbi);
+      gf2d_ui_button_set_func_name(temp,tbi);
       gf2d_ui_button_setup_collision_body(tbi);
     }
     else
     {
-      gf2d_ui_box_info_rect(temp);
+      bi = gf2d_ui_box_info_rect(temp);
       tbi->boxInfo = bi;
       tbi->s1 = NULL;
       tbi->s2 = NULL;
+      gf2d_ui_button_set_func_name(temp,tbi);
       gf2d_ui_button_setup_collision_body(tbi);
     }
 
@@ -61,15 +73,50 @@ void gf2d_ui_button_switch_box_sprite(ButtonInfo * bi)
 
 void gf2d_ui_button_draw_all()
 {
+
   gf2d_ui_box_draw_all();
+
 }
+
 
 void gf2d_ui_button_set_func_name(SJson * value,ButtonInfo *tbi)
 {
-  char * func_name;
+  char * onRelease,*onHold;
+  char * onRelease_data,*onHold_data;
+  Function * oh, * or;
+  onRelease = gf2d_ui_helper_functions_get_object_value_as_string(value,"onReleaseName");
+  tbi->onReleaseName = onRelease;
+  or = gf2d_find_functions_find_func(onRelease);
+  if(or)
+    tbi->onRelease = or->func;
+  else
+    tbi->onRelease = NULL;
+  onRelease_data = gf2d_ui_helper_functions_get_object_value_as_string(value,"onReleaseData");
+  if(!onRelease_data)
+    tbi->onRelease_data = NULL;
+  else if(strcmp(onRelease_data,"NULL")== 0)
+   tbi->onRelease_data = NULL;
+  else
+  {
+    tbi->onRelease_data = NULL;
+  }
 
-  func_name = gf2d_ui_helper_functions_get_object_value_as_string(value,"func_name");
-  tbi->func_name = func_name;
+  onHold = gf2d_ui_helper_functions_get_object_value_as_string(value,"onHoldName");
+  tbi->onHoldName = onHold;
+  oh = gf2d_find_functions_find_func(onHold);
+  if(oh)
+    tbi->onHold = oh->func;
+  else
+    tbi->onHold = NULL;
+  onHold_data = gf2d_ui_helper_functions_get_object_value_as_string(value,"onHoldData");
+  if(!onHold_data)
+    tbi->onHold_data = NULL;
+  else if(strcmp(onHold_data,"NULL")== 0)
+   tbi->onHold_data = NULL;
+  else
+  {
+    tbi->onHold_data = NULL;
+  }
 }
 
 void gf2d_ui_button_sprite_init(SJson * value,ButtonInfo * tbi)
@@ -102,21 +149,79 @@ void gf2d_ui_button_sprite_init(SJson * value,ButtonInfo * tbi)
 
   tbi->s1 = temp1;
   tbi->s2 = temp2;
+  free(xml_tagname);
+  free(json_location);
+
 }
 
 void gf2d_ui_button_setup_collision_body(ButtonInfo *b)
 {
-  Uint8 CollisionType = 0;
   cpFloat length,width,radius;
-
-  length = b->boxInfo->height;
-  width = b->boxInfo->width;
+  cpVect pos;
+  float x,y;
+  int resizex,resizey;
+  cpShapeFilter filter = gf2d_ui_button_filter();
+  resizex = b->boxInfo->resizex;
+  resizey = b->boxInfo->resizey;
+  //slog("resizex is %d\tresizey is %d",resizex,resizey);
+  length = b->boxInfo->height * resizey;
+  width = b->boxInfo->width * resizex;
   radius = 0;
-  b->shape = gf2d_physics_add_square_body(length,width,radius,1);
+  b->shape = gf2d_physics_add_square_body(length,width,radius,0);
   b->body = cpShapeGetBody(b->shape);
-  cpShapeSetCollisionType(b->shape,CollisionType);
+  cpShapeSetCollisionType(b->shape,BUTTON);
   cpBodySetUserData(b->body,b);
+  x = (float)b->boxInfo->posx;
+  y = (float)b->boxInfo->posy;
+
+  pos = cpv(x,y);
+
+  cpBodySetPosition(b->body,pos);
+  cpSpaceReindexShapesForBody(cpBodyGetSpace(b->body),b->body);
+  cpShapeSetFilter(b->shape,filter);
 }
+
+void gf2d_ui_button_update_collision_body(ButtonInfo *b)
+{
+  cpVect pos;
+  pos = cpv(b->boxInfo->posx,b->boxInfo->posy);
+  cpBodySetPosition(b->body,pos);
+  //cpSpaceReindexShapesForBody(cpBodyGetSpace(b->body),b->body);
+
+}
+
+void gf2d_ui_button_update_graphics_position_all()
+{
+    int i,count;
+    ButtonInfo * butt;
+    count = gfc_list_get_count(uba.buttons);
+    for(i=0;i<count;i++)
+    {
+      butt = gfc_list_get_nth(uba.buttons,i);
+      gf2d_ui_button_update_graphics_position(butt);
+    }
+}
+
+void gf2d_ui_button_update_graphics_position(ButtonInfo *b)
+{
+  cpVect pos = cpBodyGetPosition(b->body);
+  b->boxInfo->posx = pos.x;
+  b->boxInfo->posy = pos.y;
+}
+
+cpShapeFilter gf2d_ui_button_filter()
+{
+  cpGroup group;
+  cpBitmask mask;
+  cpBitmask cat;
+  cpShapeFilter filter;
+  group = 0;
+  mask = BUTTON;
+  cat = MOUSE;
+  filter = cpShapeFilterNew(group,cat,mask);
+  return filter;
+}
+
 
 
 ButtonInfo * gf2d_ui_button_new()
@@ -124,16 +229,17 @@ ButtonInfo * gf2d_ui_button_new()
 
   ButtonInfo * temp = (ButtonInfo*) malloc(sizeof(ButtonInfo));
 
-  temp->func_name = NULL;
-  temp->boxInfo = gf2d_ui_box_new();
+  temp->onHoldName = NULL;
+  temp->onReleaseName = NULL;
+  temp->boxInfo = NULL;
   temp->s1 = NULL;
   temp->s2 = NULL;
 
   temp->shape = NULL;
   temp->body = NULL;
-
-
-  gfc_list_append(uba.buttons,temp);
+  temp->refcount = buttCount;
+  buttCount = buttCount+1;
+  uba.buttons = gfc_list_append(uba.buttons,temp);
   return temp;
 }
 
@@ -145,7 +251,13 @@ void gf2d_ui_button_close()
   for(i = 0;i<count;i++)
   {
     temp = gfc_list_get_nth(uba.buttons,i);
-    free(temp->func_name);
+    if(temp->onHoldName)
+      free(temp->onHoldName);
+    if(temp->onReleaseName)
+      free(temp->onReleaseName);
+    //if(temp->func_data !=NULL)
+      //free(temp->func_data);
     free(temp);
   }
+  gfc_list_delete(uba.buttons);
 }

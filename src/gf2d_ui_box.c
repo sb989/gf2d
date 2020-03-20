@@ -28,7 +28,7 @@ BoxInfo * gf2d_ui_box_new()
   temp->posx = 0;
   temp->posy = 0;
   temp->image_or_rect = 0;
-  gfc_list_append(uba.boxes,temp);
+  uba.boxes = gfc_list_append(uba.boxes,temp);
   return temp;
 }
 
@@ -44,20 +44,20 @@ void gf2d_ui_box_load_boxes(SJson *boxes)
     value = sj_array_get_nth(boxes,i);
     if(!value)continue;
     image_or_rect = gf2d_ui_helper_functions_get_object_value_as_string(value,"image_or_rect");
-    if(strcmp(image_or_rect,"image")==0)
+    if(strcmp(image_or_rect,"image_uneven")==0)
     {
-      gf2d_ui_box_info_image(value);
-      //gfc_list_append(uba.boxes,temp_si);
+      gf2d_ui_box_info_image_uneven(value);
+    }
+    else if(strcmp(image_or_rect,"image_even")==0)
+    {
+      gf2d_ui_box_info_image_even(value);
     }
     else
     {
       gf2d_ui_box_info_rect(value);
-      //gfc_list_append(uba.boxes,temp_si);
     }
   }
 }
-
-
 
 SJson * gf2d_ui_box_get_sprite_info_from_json(SJson *json_file,char * key)
 {
@@ -79,13 +79,31 @@ SJson * gf2d_ui_box_get_sprite_info_from_json(SJson *json_file,char * key)
   return NULL;
 }
 
-
- BoxInfo * gf2d_ui_box_info_image(SJson * value)
+BoxInfo * gf2d_ui_box_init_box(Sprite *s,int xOffset,int yOffset,int width,int height,float resizex,float resizey,int posx,int posy,int image_or_rect,Vector4D color,int sprite_num)
 {
-  char *file_location,*posx,*posy,*xml_tagname;
-  char *resize,*resizex,*resizey,*json_location;
-  int x,y,width,height;
-  int screen_width,screen_height;
+  BoxInfo * box = gf2d_ui_box_new();
+
+  box->s = s;
+  box->xOffset = xOffset;
+  box->yOffset = yOffset;
+  box->width = width;
+  box->height = height;
+  box->resizex = resizex;
+  box->resizey = resizey;
+  box->posx = posx;
+  box->posy = posy;
+  box->image_or_rect = image_or_rect;
+  box->color = color;
+  box->sprite_num = sprite_num;
+  box->render = 1;
+  return box;
+
+}
+
+BoxInfo * gf2d_ui_box_info_image_uneven(SJson * value)
+{
+  char *file_location,*posx,*posy,*xml_tagname,*tempy,*tempx,*resize,*json_location;
+  int xOff,yOff,width,height,resizex,resizey,screen_width,screen_height;
   SJson *tile_map_info,*sprite_info;
   Sprite * temp;
   BoxInfo * temp_si;
@@ -93,60 +111,108 @@ SJson * gf2d_ui_box_get_sprite_info_from_json(SJson *json_file,char * key)
   file_location = gf2d_ui_helper_functions_get_object_value_as_string(value,"file_location");
   posx = gf2d_ui_helper_functions_get_object_value_as_string(value,"posx");
   posy = gf2d_ui_helper_functions_get_object_value_as_string(value,"posy");
-  xml_tagname = gf2d_ui_helper_functions_get_object_value_as_string(value,"xml_tagname");
   resize = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize");
+
+  xml_tagname = gf2d_ui_helper_functions_get_object_value_as_string(value,"xml_tagname");
   json_location = gf2d_ui_helper_functions_json_file_location(file_location);
   tile_map_info = sj_load(json_location);
+
   sprite_info = gf2d_ui_box_get_sprite_info_from_json(tile_map_info,xml_tagname);
-  x = atoi(gf2d_ui_helper_functions_get_object_value_as_string(sprite_info,"@x"));
-  y = atoi(gf2d_ui_helper_functions_get_object_value_as_string(sprite_info,"@y"));
+
+  xOff = atoi(gf2d_ui_helper_functions_get_object_value_as_string(sprite_info,"@x"));
+  yOff = atoi(gf2d_ui_helper_functions_get_object_value_as_string(sprite_info,"@y"));
   width = atoi(gf2d_ui_helper_functions_get_object_value_as_string(sprite_info,"@width"));
   height = atoi(gf2d_ui_helper_functions_get_object_value_as_string(sprite_info,"@height"));
 
-  temp = gf2d_sprite_load_all(file_location,x+width,y+height,1);
-  temp_si = gf2d_ui_box_new();
-  temp_si->s = temp;
-  temp_si->xOffset = x;
-  temp_si->yOffset = y;
-  temp_si->width = width;
-  temp_si->height = height;
-  temp_si->posx = atoi(posx);
-  temp_si->posy = atoi(posy);
-  temp_si->image_or_rect = 1;
-  //sj_echo(value);
+  temp = gf2d_sprite_load_all(file_location,xOff+width,yOff+height,1);
+
   if(strcmp(resize,"yes")==0)
   {
-
-    resizex = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize_x");
-    resizey = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize_y");
+    tempx = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize_x");
+    tempy = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize_y");
     SDL_Window *win = gf2d_graphics_get_window();
     SDL_GetWindowSize(win,&screen_width,&screen_height);
-    if(strcmp(resizex,"screen_width")==0)
+    if(strcmp(tempx,"screen_width")==0)
     {
-      temp_si->resizex = screen_width;
+      resizex = screen_width;
     }
     else
     {
-      temp_si->resizex = atoi(resizex);
+      resizex = atoi(tempx);
     }
-    if(strcmp(resizey,"screen_height")==0)
+    if(strcmp(tempy,"screen_height")==0)
     {
-      temp_si->resizey = screen_height;
+      resizey = screen_height;
     }
     else
     {
-      temp_si->resizey = atoi(resizey);
+      resizey = atoi(tempy);
     }
   }
+  else
+  {
+    resizex = 1;
+    resizey = 1;
+  }
+  temp_si = gf2d_ui_box_init_box(temp,xOff,yOff,width,height,resizex,resizey,atoi(posx),atoi(posy),1,vector4d(0,0,0,0),0);
   free(json_location);
   return temp_si;
 }
+BoxInfo * gf2d_ui_box_info_image_even(SJson * value)
+{
+  char *file_location,*posx,*posy,*resize,*tempx,*tempy;
+  int width,height,resizex,resizey,screen_width,screen_height,spl,sprite_num;
+  Sprite * temp;
+  BoxInfo * temp_si;
+
+  file_location = gf2d_ui_helper_functions_get_object_value_as_string(value,"file_location");
+  posx = gf2d_ui_helper_functions_get_object_value_as_string(value,"posx");
+  posy = gf2d_ui_helper_functions_get_object_value_as_string(value,"posy");
+  resize = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize");
+  width = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"width"));
+  height = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"height"));
+  spl =  atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"spl"));
+  temp = gf2d_sprite_load_all(file_location,width,height,1);
+  sprite_num = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"sprite_num"));
+  if(strcmp(resize,"yes")==0)
+  {
+    tempx = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize_x");
+    tempy = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize_y");
+    SDL_Window *win = gf2d_graphics_get_window();
+    SDL_GetWindowSize(win,&screen_width,&screen_height);
+    if(strcmp(tempx,"screen_width")==0)
+    {
+      resizex = screen_width;
+    }
+    else
+    {
+      resizex = atoi(tempx);
+    }
+    if(strcmp(tempy,"screen_height")==0)
+    {
+      resizey = screen_height;
+    }
+    else
+    {
+      resizey = atoi(tempy);
+    }
+  }
+  else
+  {
+    resizex = 1;
+    resizey = 1;
+  }
+  temp_si = gf2d_ui_box_init_box(temp,0,0,width,height,resizex,resizey,atoi(posx),atoi(posy),2,vector4d(0,0,0,0),sprite_num);
+  return temp_si;
+}
+
+
 
 BoxInfo * gf2d_ui_box_info_rect(SJson * value)
 {
 
   char *posx,*posy;
-  int screen_width,screen_height;
+  int screen_width,screen_height,height,width;
   BoxInfo * temp_si;
   SDL_Window *win;
   Vector4D rcolor;
@@ -155,32 +221,29 @@ BoxInfo * gf2d_ui_box_info_rect(SJson * value)
   posy = gf2d_ui_helper_functions_get_object_value_as_string(value,"posy");
   win = gf2d_graphics_get_window();
   SDL_GetWindowSize(win,&screen_width,&screen_height);
-  temp_si = gf2d_ui_box_new();
+
   if(strcmp(gf2d_ui_helper_functions_get_object_value_as_string(value,"width"),"screen_width")==0)
   {
-    temp_si->width = screen_width;
+    width = screen_width;
   }
   else
   {
-    temp_si->width = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"width"));
+    width = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"width"));
   }
   if(strcmp(gf2d_ui_helper_functions_get_object_value_as_string(value,"height"),"screen_height")==0)
   {
-    temp_si->height = screen_height;
+    height = screen_height;
   }
   else
   {
-    temp_si->height = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"height"));
+    height = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"height"));
   }
   rcolor.x = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.x"));
   rcolor.y = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.y"));
   rcolor.z = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.z"));
   rcolor.w = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.w"));
-  slog("x is %f y is %f w is %f h is %f",rcolor.x,rcolor.y,rcolor.z,rcolor.w);
-  temp_si->color = rcolor;
 
-  temp_si->posx = atoi(posx);
-  temp_si->posy = atoi(posy);
+  temp_si = gf2d_ui_box_init_box(NULL,0,0,width,height,1,1,atoi(posx),atoi(posy),0,rcolor,0);
   return temp_si;
 }
 
@@ -193,7 +256,9 @@ void gf2d_ui_box_draw_all()
   for(i=0;i<count;i++)
   {
     s = gfc_list_get_nth(uba.boxes,i);
-    gf2d_ui_box_draw(s);
+
+    if(s->render == 1)
+      gf2d_ui_box_draw(s);
   }
 }
 
@@ -211,16 +276,25 @@ void gf2d_ui_box_draw(BoxInfo *s)
     v2->y = (float)s->resizey;
     //slog("x is %f y is %f",v2->x,v2->y);
     gf2d_sprite_draw(s->s,vector2d(s->posx,s->posy),v2,NULL,
-    &v4,NULL,NULL,NULL,0);
+    &v4,NULL,NULL,NULL,s->sprite_num);
     free(v2);
   }
-  else
+  else if(s->image_or_rect == 0)
   {
     rect.x = s->posx;
     rect.y = s->posy;
     rect.w = s->width;
     rect.h = s->height;
     gf2d_draw_fill_rect(rect,s->color);
+  }
+  else
+  {
+    v2 = (Vector2D * )malloc(sizeof(Vector2D));
+    v2->x = (float)s->resizex;
+    v2->y = (float)s->resizey;
+    gf2d_sprite_draw(s->s,vector2d(s->posx,s->posy),v2,NULL,
+    NULL,NULL,NULL,NULL,s->sprite_num);
+    free(v2);
   }
 }
 

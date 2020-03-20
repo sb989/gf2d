@@ -24,7 +24,7 @@ OBJECTS = $(patsubst %.c,%.o,$(wildcard *.c))
 GTK_CFLAGS = `pkg-config --cflags gtk+-3.0`
 GTK_LDFLAGS = `pkg-config --libs gtk+-3.0`
 SDL_CFLAGS = `sdl2-config --cflags` $(INC_PARAMS)
-SDL_LDFLAGS = `sdl2-config --libs` -lSDL2_image -lpng -ljpeg -lz -lm
+SDL_LDFLAGS = `sdl2-config --libs` -lSDL2_image -lpng -ljpeg -lz -lm -lSDL2_ttf
 LFLAGS = -g  -o ../$(PROJECT)
 CFLAGS = -g  -fPIC -Wall -pedantic -std=gnu99 -fgnu89-inline -Wno-unknown-pragmas -Wno-variadic-macros
 

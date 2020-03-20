@@ -7,6 +7,8 @@ char * gf2d_ui_helper_functions_get_object_value_as_string(SJson *object,char * 
   SJson *temp_value;
   char * temp;
   temp_value = sj_object_get_value(object,key);
+  if(!temp_value)
+    return NULL;
   //slog("key is %s",key);
   //sj_echo(temp_value);
   output = temp_value->get_string(temp_value);

@@ -179,6 +179,9 @@ Sprite *gf2d_sprite_load_all(
         sprite->frame_w = surface->w;
     }
     else sprite->frame_w = frameWidth;
+
+    sprite->total_h = surface->h;
+    sprite->total_w = surface->w;
     sprite->frames_per_line = framesPerLine;
     gfc_line_cpy(sprite->filepath,filename);
 
@@ -205,7 +208,7 @@ void gf2d_sprite_draw(
     Vector2D position,
     Vector2D * scale,
     Vector2D * scaleCenter,
-    Vector4D * xyOffset,
+    Vector4D * xyOffset,//extra
     Vector3D * rotation,
     Vector2D * flip,
     Vector4D * colorShift,
@@ -214,7 +217,8 @@ void gf2d_sprite_draw(
     SDL_Rect cell,target;
     SDL_RendererFlip flipFlags = SDL_FLIP_NONE;
     SDL_Point r;
-    int fpl,xBegin,yBegin,xWidth,yHeight;
+    int fpl;
+    int xBegin,yBegin,xWidth,yHeight;//extra
     Vector2D scaleFactor = {1,1};
     Vector2D scaleOffset = {0,0};
     if (!sprite)
@@ -268,13 +272,8 @@ void gf2d_sprite_draw(
         frame/fpl * sprite->frame_h,
         sprite->frame_w,
         sprite->frame_h);
-    gfc_rect_set(
-        cell,
-        xBegin,
-        yBegin,
-        xWidth,
-        yHeight
-    );
+    if(xyOffset)
+      gfc_rect_set(cell,xBegin,yBegin,xWidth,yHeight);
     gfc_rect_set(
         target,
         position.x - (scaleFactor.x * scaleOffset.x),

@@ -3,14 +3,22 @@
 #include "../Chipmunk-7.0.3/include/chipmunk/chipmunk.h"
 #include "gf2d_ui_box.h"
 #include "gf2d_physics.h"
+#include "gf2d_find_functions.h"
 typedef struct
 {
   BoxInfo * boxInfo;
-  char * func_name;
+  char *onReleaseName;
+  char *onHoldName;
+  void (*onRelease)(void*);
+  void (*onHold)(void*);
+  void *onRelease_data;
+  void *onHold_data;
   Sprite * s1;
   Sprite * s2;
   cpBody * body;
   cpShape * shape;
+  int refcount;
+  int holdernum;
 }ButtonInfo;
 
 
@@ -22,5 +30,11 @@ void gf2d_ui_button_sprite_init(SJson * value,ButtonInfo * tbi);
 ButtonInfo * gf2d_ui_button_new();
 void gf2d_ui_button_close();
 void gf2d_ui_button_setup_collision_body(ButtonInfo *b);
+cpShapeFilter gf2d_ui_button_filter();
+void gf2d_ui_touch(cpShape *a);
+void gf2d_ui_button_set_func_name(SJson * value,ButtonInfo *tbi);
+void gf2d_ui_button_update_collision_body(ButtonInfo *b);
+void gf2d_ui_button_update_graphics_position(ButtonInfo *b);
+void gf2d_ui_button_update_graphics_position_all();
 
 #endif

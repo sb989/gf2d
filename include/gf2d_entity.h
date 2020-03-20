@@ -20,9 +20,10 @@ typedef struct Entity_S{
 
 void gf2d_entity_animate(Entity *e);
 void gf2d_entity_update(Entity * e);
-Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos);
+Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos,uint8_t CollisionType,cpShapeFilter filter);
 void gf2d_entity_manager_insert(Entity *e);
 void gf2d_entity_update_all();
 void gf2d_entity_init_manager();
+Entity * gf2d_entity_setup_collision_body(Entity *e,int length,int width,int radius, int type,uint8_t CollisionType,cpShapeFilter filter);
 
 #endif

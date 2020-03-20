@@ -21,7 +21,7 @@ void gf2d_entity_init_manager()
   entManager.count = 0;
 }
 
-Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos)
+Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos, uint8_t CollisionType,cpShapeFilter filter)
 {
   if(entManager.count == entManager.size)
   {
@@ -29,7 +29,7 @@ Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos)
     return NULL;
   }
   Entity * temp = (Entity *)malloc(sizeof(Entity));
-  Uint8 CollisionType = 0;
+  //Uint8 CollisionType = 0;
   temp->name = name;
   temp->s = s;
   temp->position = pos;
@@ -37,12 +37,19 @@ Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos)
   length = s->frame_h;
   width = s->frame_w;
   radius = 0;
-  temp->shape = gf2d_physics_add_square_body(length,width,radius,0);
-  temp->body = cpShapeGetBody(temp->shape);
-  cpShapeSetCollisionType(temp->shape,CollisionType);
-  cpBodySetUserData(temp->body,temp);
-  gf2d_entity_manager_insert(temp);
+  temp = gf2d_entity_setup_collision_body(temp,length,width,radius,0,CollisionType,filter);
   return temp;
+}
+
+Entity * gf2d_entity_setup_collision_body(Entity *e,int length,int width,int radius, int type,uint8_t CollisionType,cpShapeFilter filter)
+{
+  e->shape = gf2d_physics_add_square_body(length,width,radius,type);
+  e->body = cpShapeGetBody(e->shape);
+  cpShapeSetCollisionType(e->shape,CollisionType);
+  cpBodySetUserData(e->body,e);
+  cpShapeSetFilter(e->shape,filter);
+  gf2d_entity_manager_insert(e);
+  return e;
 }
 
 void gf2d_entity_update_all()
@@ -75,7 +82,7 @@ void gf2d_entity_manager_insert(Entity *e)
 void gf2d_entity_animate(Entity *e)
 {
 
-  gf2d_sprite_draw(e->s,e->position,NULL,NULL,NULL,NULL,NULL,NULL,e->frame);
+  gf2d_sprite_draw(e->s,e->position,NULL,NULL,NULL,NULL,NULL,NULL,0);//e->frame);
   e->frame +=.1;
 
 }

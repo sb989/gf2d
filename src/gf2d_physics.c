@@ -7,31 +7,46 @@ void gf2d_physics_init()
 {
   s.space = cpSpaceNew();
   cpSpaceSetIterations(s.space, 10);
-	cpSpaceSetSleepTimeThreshold(s.space, 0.5f);
+	cpSpaceSetSleepTimeThreshold(s.space, 1000.0);
+  gf2d_collision_handlers_add_all(s.space);
   atexit(gf2d_physics_close);
+}
+
+void gf2d_physics_update()
+{
+  float dt = 1.0/60.0;
+  cpSpaceStep(s.space,dt);
 }
 
 cpShape * gf2d_physics_add_square_body(cpFloat length,cpFloat width,cpFloat radius,uint8_t type)
 {
   cpBody *body;
   cpShape * shape;
-
+  cpBB bb;
+  bb.l = 0;
+  bb.b = 0;
+  bb.r = width;
+  bb.t = length;
   if(type == 1)
   {//body that does not respond to physics and generally does not move
     body = cpSpaceAddBody(s.space,cpBodyNewStatic());
-    shape = cpSpaceAddShape(s.space,cpBoxShapeNew(body,length,width,radius));
+    //shape = cpSpaceAddShape(s.space,cpBoxShapeNew(body,width,length,radius));
+    shape = cpSpaceAddShape(s.space,cpBoxShapeNew2(body,bb,radius));
     return shape;
   }
   else if(type == 0)
   {//body that is controlled by code not physics
     body = cpSpaceAddBody(s.space,cpBodyNewKinematic());
-    shape = cpSpaceAddShape(s.space,cpBoxShapeNew(body,length,width,radius));
+    //shape = cpSpaceAddShape(s.space,cpBoxShapeNew(body,width,length,radius));
+    shape = cpSpaceAddShape(s.space,cpBoxShapeNew2(body,bb,radius));
+
     return shape;
   }
   else
   {//body that is controlled by physics
-    body = cpSpaceAddBody(s.space,cpBodyNew(0,0));
-    shape = cpSpaceAddShape(s.space,cpBoxShapeNew(body,length,width,radius));
+    body = cpSpaceAddBody(s.space,cpBodyNew(10,10));
+//  shape = cpSpaceAddShape(s.space,cpBoxShapeNew(body,length,width,radius));
+    shape = cpSpaceAddShape(s.space,cpBoxShapeNew2(body,bb,radius));
     return shape;
   }
 

@@ -13,6 +13,7 @@ typedef struct Sprite_S
     SDL_Texture *texture;
     Uint32 frames_per_line;
     Uint32 frame_w,frame_h;
+    Uint32 total_w,total_h;
 }Sprite;
 
 /**
@@ -85,6 +86,7 @@ void gf2d_sprite_free(Sprite *sprite);
 void gf2d_sprite_clear_all();
 
 
+Sprite *gf2d_sprite_new();
 
 
 #endif
