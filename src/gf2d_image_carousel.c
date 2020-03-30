@@ -2,11 +2,12 @@
 
 static List *carousels = NULL;
 static int car_count;
-
+static int last_update;
 void gf2d_image_carousel_init()
 {
   carousels = gfc_list_new();
   car_count = 0;
+  last_update = 0;
   atexit(gf2d_image_carousel_free);
 }
 
@@ -112,26 +113,38 @@ void gf2d_image_carousel_shift_left(void *right)
   Carousel *c;
   CarouselElement *ce;
   int i,count;
-  cpVect vel;
-  vel.x = -50;
-  vel.y = 0;
+//  cpVect vel,pos;
+  //vel.x = -50;
+  //vel.y = 0;
   c = gfc_list_get_nth(carousels,((ButtonInfo*)right)->holdernum);//c = gf2d_image_carousel_find_right_button_carousel((ButtonInfo*)right);
   if(!c)
     return;
   count = gfc_list_get_count(c->carouselElements);
-
+  //test = 0;
   for(i = 0; i<count;i++)
   {
     ce = gfc_list_get_nth(c->carouselElements,i);
+  //  if(cpBodyGetVelocity(ce->butt->body).x < 0)
+    //  break;
     ce->posx = ce->posx-10;
     ce->butt->boxInfo->posx = ce->posx;
-  //  cpBodySetVelocity(ce->butt->body,vel);
+    /*cpBodySetVelocity(ce->butt->body,vel);
+    pos = cpBodyGetPosition(ce->butt->body);
+    ce->posx = pos.x;
+    ce->butt->boxInfo->posx = ce->posx;*/
     gf2d_image_carousel_update_element_visibility(ce,c);
     if(ce->render == 1)
+    {
+      //test = test+1;
       gf2d_ui_button_update_collision_body(ce->butt);
+    }
+
   }
+
+  //slog("the amount of carousel elements that will be rendered is %d",test);
   c->new_posx = c->new_posx-10;
   c->moving = 1;
+
 }
 
 void gf2d_image_carousel_shift_right(void *left)
@@ -139,32 +152,67 @@ void gf2d_image_carousel_shift_right(void *left)
   Carousel *c;
   CarouselElement *ce;
   int i,count;
-  //cpVect vel;
+  //cpVect vel,pos;
   //vel.x = 50;
-  //vel.y = 0;
+ //vel.y = 0;
   c = gfc_list_get_nth(carousels,((ButtonInfo*)left)->holdernum);//gf2d_image_carousel_find_left_button_carousel((ButtonInfo*)left);
   if(!c)
     return;
   count = gfc_list_get_count(c->carouselElements);
+  //test = 0;
   for(i = 0; i<count;i++)
   {
     ce = gfc_list_get_nth(c->carouselElements,i);
+    //if(cpBodyGetVelocity(ce->butt->body).x > 0)
+      //break;
     ce->posx = ce->posx+10;
     ce->butt->boxInfo->posx = ce->posx;
-    //cpBodySetVelocity(ce->butt->body,vel);
+    /*cpBodySetVelocity(ce->butt->body,vel);
+    pos = cpBodyGetPosition(ce->butt->body);
+    ce->posx = pos.x;
+    ce->butt->boxInfo->posx = ce->posx;*/
     gf2d_image_carousel_update_element_visibility(ce,c);
+
     if(ce->render ==1)
+    {
       gf2d_ui_button_update_collision_body(ce->butt);
+      //test = test+1;
+    }
   }
+  //slog("the amount of carousel elements that will be rendered is %d",test);
   c->new_posx = c->new_posx+10;
   c->moving = 1;
+
+
+}
+
+void gf2d_image_carousel_reindex(Carousel *c)
+{
+  CarouselElement *ce;
+  int i,count;
+  //c = gfc_list_get_nth(carousels,((ButtonInfo*)left)->holdernum);//gf2d_image_carousel_find_left_button_carousel((ButtonInfo*)left);
+  if(!c)
+    return;
+  count = gfc_list_get_count(c->carouselElements);
+  //test = 0;
+
+  if(SDL_GetTicks() - last_update > 1000)
+  {
+    last_update = SDL_GetTicks();
+    for(i = 0; i<count;i++)
+    {
+      ce = gfc_list_get_nth(c->carouselElements,i);
+      cpSpaceReindexShapesForBody(cpBodyGetSpace(ce->butt->body),ce->butt->body);
+    }
+  }
+
 }
 
 void gf2d_image_carousel_stop_moving(void *butt)
 {
   Carousel *c;
   int i,count;
-  cpVect vel;
+  cpVect vel,pos;
   CarouselElement *ce;
   vel.x = 0;
   vel.y = 0;
@@ -175,8 +223,12 @@ void gf2d_image_carousel_stop_moving(void *butt)
   {
     ce = gfc_list_get_nth(c->carouselElements,i);
     cpBodySetVelocity(ce->butt->body,vel);
+    pos = cpBodyGetPosition(ce->butt->body);
+    ce->posx = pos.x;
+    ce->butt->boxInfo->posx = ce->posx;
   }
   c->moving = 0;
+
 
 }
 
@@ -195,6 +247,8 @@ void gf2d_image_carousel_update_element_visibility_all(Carousel *c)
 void gf2d_image_carousel_update_element_visibility(CarouselElement *ce,Carousel *c)
 {
   int posx;
+  //cpVect pos;
+  //pos = cpBodyGetPosition(ce->butt->body);
   posx = ce->butt->boxInfo->posx;//posx;
   if( (posx+ c->height > c->posx + c->left_width) && (posx < (c->posx)+(c->width)-c->right_width) )
     ce->render = 1;
@@ -261,21 +315,44 @@ void gf2d_image_carousel_update_element_position_all(Carousel *c)
 void gf2d_image_carousel_draw_lr(Carousel *c)
 {
   Vector2D * v2;
-
-  BoxInfo * s = c->left->boxInfo;
+  BoxInfo * s;
   v2 = (Vector2D * )malloc(sizeof(Vector2D));
-  v2->x = (float)s->resizex;
-  v2->y = (float)s->resizey;
-  gf2d_sprite_draw(s->s,vector2d(s->posx,s->posy),v2,NULL,
-  NULL,NULL,NULL,NULL,s->sprite_num);
+  if(c->left)
+  {
+    s = c->left->boxInfo;
 
-  s = c->right->boxInfo;
-  v2->x = (float)s->resizex;
-  v2->y = (float)s->resizey;
-  gf2d_sprite_draw(s->s,vector2d(s->posx,s->posy),v2,NULL,
-  NULL,NULL,NULL,NULL,s->sprite_num);
+    v2->x = (float)s->resizex;
+    v2->y = (float)s->resizey;
+    gf2d_sprite_draw(s->s,vector2d(s->posx,s->posy),v2,NULL,
+    NULL,NULL,NULL,NULL,s->sprite_num);
+  }
+  if(c->right)
+  {
+    s = c->right->boxInfo;
+    v2->x = (float)s->resizex;
+    v2->y = (float)s->resizey;
+    gf2d_sprite_draw(s->s,vector2d(s->posx,s->posy),v2,NULL,
+    NULL,NULL,NULL,NULL,s->sprite_num);
+
+  }
 
   free(v2);
+}
+
+void gf2d_image_carousel_clear_list()
+{
+  int i,count;
+  Carousel * temp;
+  count = gfc_list_get_count(carousels);
+  for(i=0;i<count;i++)
+  {
+    temp = gfc_list_get_nth(carousels,i);
+    gfc_list_delete(temp->carouselElements);
+    free(temp);
+  }
+  free(carousels);
+  carousels = gfc_list_new();
+  car_count = 0;
 }
 
 void gf2d_image_carousel_free()
@@ -286,7 +363,7 @@ void gf2d_image_carousel_free()
   for(i=0;i<count;i++)
   {
     temp = gfc_list_get_nth(carousels,i);
-    free(temp->carouselElements);
+    gfc_list_delete(temp->carouselElements);
     free(temp);
   }
   free(carousels);

@@ -83,6 +83,11 @@ static void PostBodyFree(cpBody *body, cpSpace *space){
 	cpSpaceAddPostStepCallback(space, (cpPostStepFunc)BodyFreeWrap, body, NULL);
 }
 
+cpSpace * gf2d_physics_get_space()
+{
+    return s.space;
+}
+
 void gf2d_physics_close()
 {
   //ChipmunkDemoFreeSpaceChildren(s.space);

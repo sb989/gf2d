@@ -45,11 +45,7 @@ void gf2d_ui_button_update_graphics_position_all();
 void gf2d_image_carousel_stop_moving(void *butt);
 void gf2d_image_carousel_update_element_visibility_all(Carousel *c);
 void gf2d_image_carousel_update_element_position_all(Carousel *c);
-
-
-
-
-
-
+void gf2d_image_carousel_clear_list();
+void gf2d_image_carousel_reindex(Carousel *c);
 
 #endif

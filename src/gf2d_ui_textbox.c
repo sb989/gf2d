@@ -21,7 +21,7 @@ void gf2d_ui_textbox_load(SJson * textboxes)
   SJson *value;
 
   count = sj_array_get_count(textboxes);
-  slog("count is %d",count);
+  //slog("count is %d",count);
   for(i=0;i<count;i++)
   {
     value = sj_array_get_nth(textboxes,i);
@@ -29,7 +29,7 @@ void gf2d_ui_textbox_load(SJson * textboxes)
     width = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"width"));
     file_location = gf2d_ui_helper_functions_get_object_value_as_string(value,"font-filename");
     text = gf2d_ui_helper_functions_get_object_value_as_string(value,"text");
-    slog(text);
+    //slog(text);
     posx = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"posx"));
     posy = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"posy"));
     gf2d_ui_textbox_init_textbox(file_location,height,width,text,posx,posy);
@@ -76,7 +76,7 @@ Sprite * gf2d_ui_textbox_load_sprite(char * text,char * file_location,int h)
   SDL_Color color = {0,0,0};
   int width,height;
   font = TTF_OpenFont(file_location,h);
-  if(strcmp(text,"")==0)
+  if(text==NULL || strcmp(text,"")==0 )
     textSurface = TTF_RenderText_Solid(font," ",color);
   else
     textSurface = TTF_RenderText_Solid(font,text,color);
@@ -126,7 +126,20 @@ void gf2d_ui_textbox_draw(TextBox * txt)
 
 }
 
-
+void gf2d_ui_textbox_clear_list()
+{
+  int count,i;
+  TextBox * text;
+  count = gfc_list_get_count(tb.textboxes);
+  for(i=0;i<count;i++)
+  {
+    text = gfc_list_get_nth(tb.textboxes,i);
+    free(text->text);
+    free(text);
+  }
+  free(tb.textboxes);
+  tb.textboxes = gfc_list_new();
+}
 
 void gf2d_ui_textbox_close()
 {
@@ -139,5 +152,6 @@ void gf2d_ui_textbox_close()
     free(text->text);
     free(text);
   }
+  TTF_Quit();
   gfc_list_delete(tb.textboxes);
 }

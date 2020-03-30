@@ -17,6 +17,7 @@ typedef struct
   int refcount;
   int buttRefCount;
   int char_limit;
+  int char_count;
 }TypeBox;
 
 void gf2d_ui_typebox_init();
@@ -31,6 +32,9 @@ void gf2d_ui_typebox_draw_all();
 void gf2d_ui_typebox_close();
 void gf2d_ui_typebox_delete_text(TypeBox *tb);
 TypeBox * gf2d_ui_typebox_get_typebox(int ind);
+int gf2d_ui_typebox_get_count();
+char * gf2d_ui_typebox_get_text(int ind);
+void gf2d_ui_typebox_clear_list();
 
 
 #endif

@@ -13,15 +13,17 @@
 #include "gf2d_ui.h"
 #include "gf2d_physics.h"
 #include "gf2d_level_editor.h"
+#include "gf2d_game_state.h"
+#include "gf2d_enemy.h"
+#include "gf2d_main_game.h"
 int main(int argc, char * argv[])
 {
     /*variable declarations*/
     int done = 0;
-
-    Sprite * tile,*mouse;
-    int resx,resy,count;
+    Sprite *mouse;
+    int resx,resy;
     cpShapeFilter filter;
-    resx = 1080;
+    resx = 1280;
     resy = 720;
     Entity * m;
     /*program initializtion*/
@@ -32,23 +34,33 @@ int main(int argc, char * argv[])
     gf2d_sprite_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
 
-    //gf2d_file_directory_open(argc,argv);
+    gf2d_game_state_init();
     gf2d_gtk_init(argc,argv);
     gf2d_controls_manager_init();
     gf2d_physics_init();
-    gf2d_ui_init();
-    gf2d_tilemap_init_manager(resx,resy);
+    //gf2d_ui_init();
+    gf2d_button_functions_init();
     gf2d_entity_init_manager();
-    gf2d_level_editor_init();
-    tile = gf2d_sprite_load_all("images/tilemap_packed.png",16,16,27);
-    for(count =0;count<1080;count=count+40)
-      gf2d_tilemap_new(tile,28,vector2d(count,00));
+
+
+
     mouse = gf2d_sprite_load_image("images/cursor_pointer3D.png");
     filter = gf2d_mouseFilter();
-    m = gf2d_entity_new("mouse",mouse,vector2d(0,0),MOUSE,filter);
+    m = gf2d_entity_new("mouse",mouse,vector2d(0,0),MOUSE,filter,vector2d(1,1),vector2d(mouse->frame_w,mouse->frame_h));
     m->update = &gf2d_update_mouse_position;
-    m = gf2d_entity_setup_collision_body(m,1,1,0,0,MOUSE,filter);
-
+    m->updateData = m;
+    m->animateData = m;
+    m->animate = &gf2d_entity_animate;
+    m->maxFrame = 1;
+    m = gf2d_entity_setup_collision_body(m,1,1,0,0,MOUSE,filter,vector2d(0,0));
+    gf2d_ui_init();
+    gf2d_main_menu_init();
+    gf2d_level_editor_init();
+    gf2d_tilemap_init_manager(32,18,resx,resy);
+    gf2d_player_init();
+    slog("finish player init");
+    gf2d_enemy_init();
+    slog("finish setup ");
     /*main game loop*/
     while(!done)
     {
@@ -59,19 +71,27 @@ int main(int argc, char * argv[])
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame
         //backgrounds drawn first
-
-
-        //gf2d_tilemap_draw_all();
+        //gf2d_game_state_update();
         gf2d_controls_update();
-        gf2d_ui_update();
-        gf2d_entity_update_all();
-        //slog("in main loop");
+
+
         gf2d_physics_update();
-        gf2d_level_editor_update();
-        //gf2d_controls_update();
-        gf2d_sprite_draw(tile,vector2d(500,500),NULL,NULL,NULL,NULL,NULL,NULL,5);
-        gf2d_entity_animate(m);
+
+        if(gf2d_game_state_get_state() == 2 && gf2d_game_state_get_update() == 1)
+        {
+          gf2d_level_editor_update();
+        }
+        else if(gf2d_game_state_get_state() == 0&& gf2d_game_state_get_update() == 1)
+        {
+          gf2d_main_game_update();
+        }
+
+        gf2d_entity_animate_all();
+        gf2d_beam_animate_all();
+        gf2d_ui_update();
         gf2d_grahics_next_frame();// render current draw frame and skip to the next frame
+        gf2d_game_state_update();
+        gf2d_entity_update_all();
 
         if (gf2d_key_pressed(SDL_SCANCODE_ESCAPE))done = 1; // exit condition
         //slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());

@@ -2,16 +2,17 @@
 
 void gf2d_ui_init()
 {
+  slog("ui init func");
   gf2d_ui_box_init();
   gf2d_ui_button_init();
   gf2d_ui_textbox_init();
   gf2d_ui_typebox_init();
-  gf2d_button_functions_init();
 }
 
 void gf2d_ui_update()
 {
-  gf2d_ui_typebox_update();
+  if(gf2d_ui_typebox_get_count()>0)
+    gf2d_ui_typebox_update();
   //gf2d_ui_button_update_graphics_position_all();
   gf2d_ui_draw();
 }
@@ -44,4 +45,12 @@ void gf2d_ui_load(char * file_location)
   typeboxes = sj_object_new();
   typeboxes = sj_object_get_value(level,"typeboxes");
   gf2d_ui_typebox_load(typeboxes);
+}
+
+void gf2d_ui_clear()
+{
+  gf2d_ui_textbox_clear_list();
+  gf2d_ui_typebox_clear_list();
+  gf2d_ui_button_clear_list();
+  gf2d_ui_box_clear_list();
 }

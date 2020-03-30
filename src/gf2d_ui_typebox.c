@@ -16,7 +16,13 @@ static int updatetime = 0;
 static int firstUpdate = 0;
 void gf2d_ui_typebox_init()
 {
+  slog("gf2d_init function");
   tba.typeboxes = gfc_list_new();
+  typecount = 0;
+  maxButtCount = -1;
+  minButtCount = -1;
+  updatetime = 0;
+  firstUpdate = 0;
   atexit(gf2d_ui_typebox_close);
 }
 
@@ -49,10 +55,10 @@ void gf2d_ui_typebox_load(SJson * typeboxes)
     {
       minButtCount = tb->bi->refcount;
     }
-    slog("char_limit is %d",tb->char_limit);
+    //slog("char_limit is %d",tb->char_limit);
     maxButtCount = tb->bi->refcount;
     gf2d_ui_button_set_func_name(value,tb->bi);
-    slog("the new typeboxes text is %s",tb->text);
+    //slog("the new typeboxes text is %s",tb->text);
   }
 }
 
@@ -74,6 +80,7 @@ TypeBox * gf2d_ui_typebox_init_typebox(int height,int width,int posx,int posy, c
   str = (char*)malloc(sizeof(char)+1);
   strcpy(str,"");
   temp->text = str;
+  temp->char_count = 0;
   temp->selected = 0;
   temp->font_filename = font_filename;
   box = gf2d_ui_box_init_box(NULL,0,0,width,height,1,1,posx,posy,0,color,0);
@@ -143,9 +150,21 @@ void gf2d_ui_typebox_update()
 void gf2d_ui_typebox_update_text(TypeBox * tb,char * text)
 {
   int height,strlength;
-  strlength = strlen(text) + strlen(tb->text);
-  tb->text = (char *)realloc(tb->text,strlength+1);
-  strcat(tb->text,text);
+
+  if(tb->text)
+  {
+    strlength = strlen(text) + strlen(tb->text);
+    tb->text = (char *)realloc(tb->text,strlength+1);
+    strcat(tb->text,text);
+  }
+
+  else
+  {
+    strlength = strlen(text);
+    tb->text = (char *)malloc(strlength+1);
+    strcpy(tb->text,text);
+  }
+  tb->char_count = strlength;
   height = tb->text_height;
   //slog("new text is %s",tb->text);
   tb->sprite = gf2d_ui_textbox_load_sprite(tb->text,tb->font_filename,height);
@@ -208,7 +227,19 @@ TypeBox * gf2d_ui_typebox_get_typebox(int ind)
   return temp;
 }
 
-void gf2d_ui_typebox_close()
+char * gf2d_ui_typebox_get_text(int ind)
+{
+  char * text;
+  text = (gf2d_ui_typebox_get_typebox(ind))->text;
+  return text;
+}
+
+int gf2d_ui_typebox_get_count()
+{
+  return typecount;
+}
+
+void gf2d_ui_typebox_clear_list()
 {
   int i,count;
   TypeBox *temp;
@@ -216,8 +247,37 @@ void gf2d_ui_typebox_close()
   for(i = 0;i<count;i++)
   {
     temp = gfc_list_get_nth(tba.typeboxes,i);
-    free(temp->text);
-    free(temp);
+    if(temp)
+    {
+      free(temp->text);
+    }
   }
   gfc_list_delete(tba.typeboxes);
+  tba.typeboxes = gfc_list_new();
+  typecount = 0;
+  maxButtCount = -1;
+  minButtCount = -1;
+  updatetime = 0;
+  firstUpdate = 0;
+}
+
+void gf2d_ui_typebox_close()
+{
+  int i,count;
+  TypeBox *temp;
+  count = gfc_list_get_count(tba.typeboxes);
+  slog("closing typebox");
+  for(i = 0;i<count;i++)
+  {
+    temp = gfc_list_get_nth(tba.typeboxes,i);
+    if(temp)
+    {
+      slog("i=%d %p",i,temp);
+      if(temp->char_count > 0)
+        free(temp->text);
+      free(temp);
+    }
+  }
+  free(tba.typeboxes);
+  typecount = 0;
 }

@@ -8,5 +8,6 @@ void gf2d_ui_init();
 void gf2d_ui_draw();
 void gf2d_ui_load(char * file_location);
 void gf2d_ui_update();
+void gf2d_ui_clear();
 
 #endif

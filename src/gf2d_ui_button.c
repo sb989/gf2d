@@ -216,8 +216,8 @@ cpShapeFilter gf2d_ui_button_filter()
   cpBitmask cat;
   cpShapeFilter filter;
   group = 0;
-  mask = BUTTON;
-  cat = MOUSE;
+  mask = MOUSE;
+  cat = BUTTON;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;
 }
@@ -243,6 +243,26 @@ ButtonInfo * gf2d_ui_button_new()
   return temp;
 }
 
+void gf2d_ui_button_clear_list()
+{
+  int count,i;
+  ButtonInfo * temp;
+  count = gfc_list_get_count(uba.buttons);
+  for(i = 0;i<count;i++)
+  {
+    temp = gfc_list_get_nth(uba.buttons,i);
+    if(temp->onHoldName)
+      free(temp->onHoldName);
+    if(temp->onReleaseName)
+      free(temp->onReleaseName);
+    if(temp->shape && temp->body)
+      gf2d_ui_button_free_body(temp);
+    free(temp);
+  }
+  free(uba.buttons);
+  uba.buttons = gfc_list_new();
+}
+
 void gf2d_ui_button_close()
 {
   int count,i;
@@ -255,9 +275,18 @@ void gf2d_ui_button_close()
       free(temp->onHoldName);
     if(temp->onReleaseName)
       free(temp->onReleaseName);
-    //if(temp->func_data !=NULL)
-      //free(temp->func_data);
+    if(temp->shape && temp->body)
+      gf2d_ui_button_free_body(temp);
     free(temp);
   }
   gfc_list_delete(uba.buttons);
+}
+
+void gf2d_ui_button_free_body(ButtonInfo * butt)
+{
+  cpSpace * space = gf2d_physics_get_space();
+  cpSpaceRemoveShape(space, butt->shape);
+  cpSpaceRemoveBody(space, butt->body);
+  cpShapeFree(butt->shape);
+  cpBodyFree(butt->body);
 }

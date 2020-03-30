@@ -9,7 +9,7 @@ Vector2D gf2d_mouse_pos();
 Bool gf2d_left_mouse_down();
 Bool gf2d_right_mouse_down();
 Bool gf2d_key_pressed(SDL_Scancode scancode);
-void gf2d_update_mouse_position(Entity *e);
+void gf2d_update_mouse_position(void *e);
 cpShapeFilter gf2d_mouseFilter();
 Bool gf2d_right_released();
 Bool gf2d_left_released();
@@ -19,5 +19,6 @@ void gf2d_set_open_file(Bool b);
 SDL_Event gf2d_get_event();
 void gf2d_update_mouse_state();
 void gf2d_set_mouse_colliding(Bool m);
+SDL_KeyboardEvent gf2d_get_keyboard_event();
 
 #endif

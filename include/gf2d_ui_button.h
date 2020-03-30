@@ -36,5 +36,7 @@ void gf2d_ui_button_set_func_name(SJson * value,ButtonInfo *tbi);
 void gf2d_ui_button_update_collision_body(ButtonInfo *b);
 void gf2d_ui_button_update_graphics_position(ButtonInfo *b);
 void gf2d_ui_button_update_graphics_position_all();
+void gf2d_ui_button_free_body(ButtonInfo * butt);
+void gf2d_ui_button_clear_list();
 
 #endif

@@ -129,7 +129,7 @@ void gf2d_set_open_file(Bool b)
 Bool gf2d_left_released()
 {
   //gf2d_update_mouse_state();
-  int timeD = SDL_GetTicks()-cManager.releaseTime;
+  //int timeD = SDL_GetTicks()-cManager.releaseTime;
   //slog("time since left released was set is %d",timeD);
   //if(timeD>10)
     //return false;
@@ -166,18 +166,25 @@ Bool gf2d_key_pressed(SDL_Scancode scancode)
   return cManager.keys[scancode];
 }
 
-void gf2d_update_mouse_position(Entity *e)
+SDL_KeyboardEvent gf2d_get_keyboard_event()
 {
+  return cManager.e.key;
+}
+
+void gf2d_update_mouse_position(void *ent)
+{
+  Entity * e = (Entity *)ent;
   if(!cManager.openFile)
   {
     cpVect pos;
-    cpBB bb;
+    //cpBB bb;
+    SDL_GetMouseState(&cManager.mx,&cManager.my);
     e->position = gf2d_mouse_pos();
     pos = cpv(e->position.x,e->position.y);
     cpBodySetPosition(e->body,pos);
-
+    //slog("angle is %f",vector2d_angle(gf2d_mouse_pos()));
     //cpSpaceReindexShapesForBody(cpBodyGetSpace(e->body),e->body);
-    bb = cpShapeGetBB(e->shape);
+    //bb = cpShapeGetBB(e->shape);
     //slog("button t is %f b is %f l is %f r is %f ",bb.t,bb.b,bb.l,bb.r);
   }
   else
@@ -186,6 +193,8 @@ void gf2d_update_mouse_position(Entity *e)
   }
 }
 
+
+
 cpShapeFilter gf2d_mouseFilter()
 {
   cpGroup group;
@@ -193,8 +202,8 @@ cpShapeFilter gf2d_mouseFilter()
   cpBitmask cat;
   cpShapeFilter filter;
   group = 0;
-  mask = MOUSE;
-  cat = BUTTON;
+  mask = BUTTON;
+  cat = MOUSE;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;
 }

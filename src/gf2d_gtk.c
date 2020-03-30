@@ -8,10 +8,11 @@
 
 static char * filename = NULL;
 
-static char * open_dialog()
+char * open_dialog()
 {
   GtkWidget *dialog;
   char *file;
+
   dialog = gtk_file_chooser_dialog_new ("Open File",
     NULL,
     GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -21,7 +22,8 @@ static char * open_dialog()
     GTK_RESPONSE_ACCEPT,
     NULL);
 
-  slog("pog");
+
+  //slog("pog");
   gtk_widget_show_all(dialog);
 //gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog),"/");
   gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), g_get_home_dir());
@@ -43,7 +45,47 @@ static char * open_dialog()
   }
 
 }
+char * save_dialog()
+{
+  GtkWidget *dialog;
+  GtkFileChooser *chooser;
+  gint res;
+  char *filename;
+  dialog = gtk_file_chooser_dialog_new ("Save File",
+                                        NULL,
+                                        GTK_FILE_CHOOSER_ACTION_SAVE,
+                                        ("_Cancel"),
+                                        GTK_RESPONSE_CANCEL,
+                                        ("_Save"),
+                                        GTK_RESPONSE_ACCEPT,
+                                        NULL);
+  chooser = GTK_FILE_CHOOSER (dialog);
 
+  gtk_file_chooser_set_do_overwrite_confirmation (chooser, TRUE);
+
+  //if (user_edited_a_new_document)
+    gtk_file_chooser_set_current_name (chooser,("_Untitled document"));
+  //else
+  //  gtk_file_chooser_set_filename (chooser,
+    //                               existing_filename);
+
+  res = gtk_dialog_run (GTK_DIALOG (dialog));
+  if (res == GTK_RESPONSE_ACCEPT)
+  {
+    filename = gtk_file_chooser_get_filename (chooser);
+    g_print("%s\n", filename);
+    gtk_widget_destroy (dialog);
+    return filename;
+  }
+  else
+  {
+    g_print("You pressed Cancel\n");
+    gtk_widget_destroy(dialog);
+    filename = "cancel";
+    return filename;
+  }
+
+}
 void gf2d_file_directory_open(void * nothing)
 {
   int i;
@@ -53,6 +95,19 @@ void gf2d_file_directory_open(void * nothing)
     gtk_main_iteration();
 
   gf2d_set_open_file(FALSE);
+}
+
+void gf2d_file_directory_save(void * nothing)
+{
+  int i;
+  gf2d_set_open_file(TRUE);
+  filename = save_dialog();
+  for(i=0;i<8;i++)
+  {
+    gtk_main_iteration();
+  }
+  gf2d_set_open_file(FALSE);
+  gf2d_level_editor_set_save_new_file(filename);
 }
 
 

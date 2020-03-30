@@ -22,5 +22,6 @@ void gf2d_ui_textbox_close();
 void gf2d_ui_textbox_draw_all();
 int gf2d_ui_textbox_letter_pos(char c);
 Sprite * gf2d_ui_textbox_load_sprite(char * text,char * file_location,int h);
+void gf2d_ui_textbox_clear_list();
 
 #endif

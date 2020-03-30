@@ -55,8 +55,9 @@ void gf2d_find_functions_clear()
   for(i=0;i<count;i++)
   {
     f = gfc_list_get_nth(functions,i);
-    free(f);
+    if(f)
+      free(f);
   }
-  gfc_list_delete(functions);
+  free(functions);
 
 }

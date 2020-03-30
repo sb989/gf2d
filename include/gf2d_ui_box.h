@@ -42,6 +42,7 @@ BoxInfo * gf2d_ui_box_info_image_even(SJson * value);
 void gf2d_ui_box_clear_box_info(BoxInfo * si);
 void gf2d_ui_box_close();
 BoxInfo * gf2d_ui_box_init_box(Sprite *s,int xOffset,int yOffset,int width,int height,float resizex,float resizey,int posx,int posy,int image_or_rect,Vector4D color,int sprite_num);
+void gf2d_ui_box_clear_list();
 
 
 

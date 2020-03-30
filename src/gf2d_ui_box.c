@@ -161,7 +161,8 @@ BoxInfo * gf2d_ui_box_info_image_uneven(SJson * value)
 BoxInfo * gf2d_ui_box_info_image_even(SJson * value)
 {
   char *file_location,*posx,*posy,*resize,*tempx,*tempy;
-  int width,height,resizex,resizey,screen_width,screen_height,spl,sprite_num;
+  int width,height,resizex,resizey,screen_width,screen_height,sprite_num;
+  //int spl;
   Sprite * temp;
   BoxInfo * temp_si;
 
@@ -171,7 +172,7 @@ BoxInfo * gf2d_ui_box_info_image_even(SJson * value)
   resize = gf2d_ui_helper_functions_get_object_value_as_string(value,"resize");
   width = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"width"));
   height = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"height"));
-  spl =  atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"spl"));
+  //spl =  atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"spl"));
   temp = gf2d_sprite_load_all(file_location,width,height,1);
   sprite_num = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"sprite_num"));
   if(strcmp(resize,"yes")==0)
@@ -296,6 +297,20 @@ void gf2d_ui_box_draw(BoxInfo *s)
     NULL,NULL,NULL,NULL,s->sprite_num);
     free(v2);
   }
+}
+
+void gf2d_ui_box_clear_list()
+{
+  int count,i;
+  count = gfc_list_get_count(uba.boxes);
+  BoxInfo * box;
+  for(i=0;i<count;i++)
+  {
+    box = gfc_list_get_nth(uba.boxes,i);
+    free(box);
+  }
+  free(uba.boxes);
+  uba.boxes = gfc_list_new();
 }
 
 void gf2d_ui_box_close()
