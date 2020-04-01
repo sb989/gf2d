@@ -16,10 +16,17 @@
 #include "gf2d_game_state.h"
 #include "gf2d_enemy.h"
 #include "gf2d_main_game.h"
+
+static int done = 0;
+
+void gf2d_game_set_done(int d)
+{
+  done = d;
+}
+
 int main(int argc, char * argv[])
 {
     /*variable declarations*/
-    int done = 0;
     Sprite *mouse;
     int resx,resy;
     cpShapeFilter filter;
@@ -50,8 +57,9 @@ int main(int argc, char * argv[])
     m->update = &gf2d_update_mouse_position;
     m->updateData = m;
     m->animateData = m;
-    m->animate = &gf2d_entity_animate;
+    m->animate = NULL;//&gf2d_entity_draw;
     m->maxFrame = 1;
+    m->_inuse = 1;
     m = gf2d_entity_setup_collision_body(m,1,1,0,0,MOUSE,filter,vector2d(0,0));
     gf2d_ui_init();
     gf2d_main_menu_init();
@@ -77,23 +85,30 @@ int main(int argc, char * argv[])
 
         gf2d_physics_update();
 
+
+        if(gf2d_game_state_get_state() == 0&& gf2d_game_state_get_update() == 1)
+        {
+          gf2d_main_game_update();
+        }
+        else if(gf2d_game_state_get_state() == 4 && gf2d_game_state_get_update() == 1)
+        {
+          gf2d_main_game_update();
+        }
+        //slog("game state update is %d",gf2d_game_state_get_update());
+        gf2d_entity_animate_all();
+        gf2d_beam_animate_all();
+        gf2d_ui_update();
+        gf2d_entity_draw(m->animateData);
+        // render current draw frame and skip to the next frame
+        gf2d_game_state_update();
+        gf2d_entity_update_all();
+
         if(gf2d_game_state_get_state() == 2 && gf2d_game_state_get_update() == 1)
         {
           gf2d_level_editor_update();
         }
-        else if(gf2d_game_state_get_state() == 0&& gf2d_game_state_get_update() == 1)
-        {
-          gf2d_main_game_update();
-        }
-
-        gf2d_entity_animate_all();
-        gf2d_beam_animate_all();
-        gf2d_ui_update();
-        gf2d_grahics_next_frame();// render current draw frame and skip to the next frame
-        gf2d_game_state_update();
-        gf2d_entity_update_all();
-
-        if (gf2d_key_pressed(SDL_SCANCODE_ESCAPE))done = 1; // exit condition
+        gf2d_grahics_next_frame();
+        //if (gf2d_key_pressed(SDL_SCANCODE_ESCAPE))done = 1; // exit condition
         //slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
     }
     //free(temp);

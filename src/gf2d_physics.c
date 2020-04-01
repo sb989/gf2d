@@ -8,6 +8,7 @@ void gf2d_physics_init()
   s.space = cpSpaceNew();
   cpSpaceSetIterations(s.space, 10);
 	cpSpaceSetSleepTimeThreshold(s.space, 1000.0);
+  //cpSpaceSetDamping(s.space,.1);
   gf2d_collision_handlers_add_all(s.space);
   atexit(gf2d_physics_close);
 }

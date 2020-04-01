@@ -1,5 +1,7 @@
 #include "gf2d_enemy.h"
-
+#include "gf2d_draw.h"
+#include "gf2d_player.h"
+#include <math.h>
 static List * enemies = NULL;
 
 void gf2d_enemy_init()
@@ -15,10 +17,9 @@ void gf2d_enemy_init_enemy(Vector2D pos,char * color)
   Sprite *s = gf2d_sprite_load_all("images/tilemap_packed.png",16,16,27);
   e = gf2d_entity_new("enemy",s,pos,ENEMIES,gf2d_enemy_filter(),vector2d(2,2),vector2d(2*s->frame_w,2*s->frame_h));
   e->frame = 307;
-  e->animate = &gf2d_entity_draw;
-  //e->scale = (Vector2D*)malloc(sizeof(Vector2D));
-  //e->scale->x = 2;
-  //e->scale->y = 2;
+  e->animate = &gf2d_enemy_draw;
+  e->update = &gf2d_enemy_update;
+  e->hp = 20;
   e->_inuse = 1;
   if(strcmp(color,"red")==0)
   {
@@ -66,12 +67,19 @@ void gf2d_enemy_init_enemy(Vector2D pos,char * color)
   enemies = gfc_list_append(enemies,e);
 }
 
+void gf2d_enemy_draw(void *en)
+{
+  gf2d_entity_draw(en);
+  gf2d_enemy_draw_bb(en);
+
+}
+
 void gf2d_enemy_draw_bb_all()
 {
   int i,count;
   Entity *e;
   count = gfc_list_get_count(enemies);
-  for(int i =0;i<count;i++)
+  for(i =0;i<count;i++)
   {
     e = gfc_list_get_nth(enemies,i);
     gf2d_enemy_draw_bb(e);
@@ -92,17 +100,89 @@ void gf2d_enemy_draw_bb(Entity *e)
   gf2d_draw_rect(rect,color);
 }
 
+void gf2d_enemy_take_damage(int dmg,Entity *e)
+{
+  e->hp = e->hp - dmg;
+  if(e->hp ==0)
+  {
+    e->_inuse = 0;
+    gfc_list_delete_data(enemies,e);
+  }
+}
+
+void gf2d_enemy_update(void *enemy)
+{
+  Entity *e = (Entity *)enemy;
+  cpVect vel;
+  vel = cpBodyGetVelocity(e->body);
+  if(e->knockback == 1 && (fabs(vel.x) > 50 || fabs(vel.y) > 50) )
+  {
+    //slog("vel too high ");
+    cpBodySetVelocity(e->body,cpvmult(vel,0.8));
+    return;
+  }
+  else if (e->knockback == 1 && (fabs(vel.x) <= 50 && fabs(vel.y) <= 50) )
+  {
+    vel.x =vel.y = 0;
+    //slog("vel low enough returning control");
+    cpBodySetVelocity(e->body,vel);
+    e->knockback = 0;
+  }
+  if(e->_inuse == 0)
+  {
+    vel.x = vel.y = 0;
+    cpBodySetVelocity(e->body,vel);
+    vel.x = vel.y = -1;
+    cpBodySetPosition(e->body,vel);
+    e->position.x = 0;
+    e->position.y = 0;
+    return;
+  }
+  if(gf2d_main_game_get_paused() == 1)
+  {
+    vel.x = 0;
+    vel.y = 0;
+    cpBodySetVelocity(e->body,vel);
+    return;
+  }
+  //slog("moving enemy");
+  cpVect pos = cpBodyGetPosition(e->body);
+  cpVect playerPos = cpBodyGetPosition(gf2d_player_get_player(0)->ent->body);
+  e->position.x = pos.x;
+  e->position.y = pos.y;
+  vel = cpvsub(pos,playerPos);
+  vel = cpvnormalize(vel);
+  vel = cpvmult(vel,70);
+  vel = cpvneg(vel);
+  cpBodySetVelocity(e->body,vel);
+  //slog("vel is %f %f",vel.x,vel.y);
+}
+
 cpShapeFilter gf2d_enemy_filter()
 {
   cpGroup group;
   cpBitmask mask;
   cpBitmask cat;
   cpShapeFilter filter;
-  group = 0;
-  mask = PLAYER;
+  group = 2;
+  mask = PLAYER|LIGHTNING|FIRE|WIND|ROCK|WATER|FIREBALL|ICICLE;
   cat = ENEMIES;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;
+}
+
+void gf2d_enemy_clear()
+{
+  int i,count;
+  Entity *e;
+  count = gfc_list_get_count(enemies);
+  for(i=0;i<count;i++)
+  {
+    e = gfc_list_get_nth(enemies,0);
+    e->_inuse = 0;
+    gfc_list_delete_nth(enemies,0);
+  }
+
 }
 
 void gf2d_enemy_close()

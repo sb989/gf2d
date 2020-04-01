@@ -22,7 +22,10 @@ void gf2d_game_state_update()
     switch(oldState)
     {
       case game:
-        gf2d_main_game_close();
+        if(gameState != pause_menu)
+        {
+          gf2d_main_game_close();
+        }
         break;
       case main_menu:
         gf2d_main_menu_close();
@@ -34,6 +37,16 @@ void gf2d_game_state_update()
       case load_level:
         break;
       case pause_menu:
+        if(gameState == game)
+        {
+          slog("closing pause menu");
+          gf2d_pause_menu_close();
+        }
+        else if(gameState == main_menu)
+        {
+          gf2d_pause_menu_close();
+          gf2d_main_game_close();
+        }
         break;
       default:
         break;
@@ -42,7 +55,13 @@ void gf2d_game_state_update()
     switch(gameState)
     {
       case game:
-        gf2d_main_game_init();
+        if(oldState != pause_menu)
+        {
+          gf2d_main_game_init();
+          slog("oldstate is not pause_menu");
+        }
+        else if(oldState == pause_menu)
+          gf2d_main_game_init_ui();
         break;
       case main_menu:
         gf2d_main_menu_init();
@@ -53,6 +72,7 @@ void gf2d_game_state_update()
       case load_level:
         break;
       case pause_menu:
+        gf2d_pause_menu_init();
         break;
       default:
         break;
@@ -95,5 +115,12 @@ void gf2d_game_state_set_game(void * nothing)
 {
   oldState = gameState;
   gameState = game;
+  update = yes;
+}
+
+void gf2d_game_state_set_pause_menu(void * nothing)
+{
+  oldState = gameState;
+  gameState = pause_menu;
   update = yes;
 }

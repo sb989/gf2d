@@ -2,11 +2,17 @@
 #include "gf2d_fire.h"
 #include "gf2d_lightning.h"
 #include "gf2d_rock.h"
-
+#include "gf2d_wind.h"
+#include "gf2d_icicle.h"
+#include "gf2d_water.h"
+#include "gf2d_fireball.h"
+#include <math.h>
 static Player *player;
 enum directions {left,right,back,forw};
 static enum directions direction;
 static int playerCount = 0;
+enum attack{rock,water,fire,lightning,wind,icicle,fireball,nothing};
+static enum attack atk;
 //void gf2d_player_movement(TileMap * map);
 
 void gf2d_player_init()
@@ -19,24 +25,24 @@ void gf2d_player_init()
   player->ent->update = NULL;
   player->ent->animate = &gf2d_player_animate;
   player->ent->animateData = player;
-  player->ent->_inuse = 0;
+  player->ent->_inuse = 1;
   player->forw = 24;
   player->back = 25;
   player->left = (23);
   player->right = (26);
   player->frames_per_animation = 3;
   player->ent->frame = 0;
-
+  player->invincible = 0;
   player->draw_width = 1.5*gf2d_tilemap_get_tile_width();
   player->draw_height = 1.5*gf2d_tilemap_get_tile_height();
-
+  player->wind = gf2d_wind_init();
   player->fire = gf2d_fire_init();
-  slog("finished with player fire");
   player->lightning = gf2d_lightning_init();
-  slog("finished with player lightning ");
-  player->rock_limit = 1;
-  player->rock_count = 0;
+  player->water = gf2d_water_init();
+  player->rock_limit = player->icicle_limit = player->fireball_limit = 1;
+  player->rock_count = player->icicle_count = player->fireball_count = 0;
   direction = forw;
+  atk = nothing;
   player->playerNum = playerCount;
   playerCount = playerCount +1;
   atexit(gf2d_player_close);
@@ -63,6 +69,15 @@ void gf2d_player_update_position()
 Vector2D gf2d_player_get_pos()
 {
   return player->ent->position;
+}
+
+void gf2d_player_set_pos(Vector2D pos)
+{
+  cpVect p;
+  p.x = pos.x;
+  p.y = pos.y;
+  cpBodySetPosition(player->ent->body,p);
+  gf2d_player_update_position();
 }
 
 float gf2d_player_get_draw_height()
@@ -112,36 +127,53 @@ void gf2d_player_animate(void * nothing)
 {
   int f;
   Vector2D * v2;
-  if(player->ent->_inuse == 0)
-    return;
-  switch(direction)
-  {
-    case forw:
-      f = 27*(int)player->ent->frame+player->forw;
-      break;
-    case back:
-      f = 27*(int)player->ent->frame+player->back;
-      break;
-    case left:
-      f = 27*(int)player->ent->frame+player->left;
-      break;
-    case right:
-      f=27*(int)player->ent->frame+player->right;
-      break;
-    default:
-      break;
-  }
-  v2 = (Vector2D * )malloc(sizeof(Vector2D));
-  v2->x = player->resizex;
-  v2->y = player->resizey;
 
-  gf2d_sprite_draw(player->ent->s,player->ent->position,v2,NULL,NULL,NULL,NULL,NULL,f);
-  free(v2);
-  gf2d_player_draw_bb();
-  if(player->ent->frame > player->frames_per_animation-1)
-    player->ent->frame = 0;
-  else if(player->ent->frame <= player->frames_per_animation-1)
-    player->ent->frame = player->ent->frame+.1;
+  if(gf2d_game_state_get_state() == 0 || gf2d_game_state_get_state()== 4)
+  {
+    switch(direction)
+    {
+      case forw:
+        f = 27*(int)player->ent->frame+player->forw;
+        break;
+      case back:
+        f = 27*(int)player->ent->frame+player->back;
+        break;
+      case left:
+        f = 27*(int)player->ent->frame+player->left;
+        break;
+      case right:
+        f=27*(int)player->ent->frame+player->right;
+        break;
+      default:
+        break;
+    }
+    v2 = (Vector2D * )malloc(sizeof(Vector2D));
+    v2->x = player->resizex;
+    v2->y = player->resizey;
+    if(player->invincible > 0 && (player->invincible/10)%2 ==1)
+    {
+      Vector4D *color  = (Vector4D *)malloc(sizeof(Vector4D));
+      color->x = color->y = color->z = 255;
+      color->w = 0;
+      gf2d_sprite_draw(player->ent->s,player->ent->position,v2,NULL,NULL,NULL,NULL,color,f);
+      free(color);
+    }
+    else
+    {
+      gf2d_sprite_draw(player->ent->s,player->ent->position,v2,NULL,NULL,NULL,NULL,NULL,f);
+    }
+
+    if(player->invincible > 0 && player->invincible < 100 )
+      player->invincible = player->invincible +1;
+    else if(player->invincible >= 100)
+      player->invincible = 0;
+    free(v2);
+    gf2d_player_draw_bb();
+    if(player->ent->frame > player->frames_per_animation-1)
+      player->ent->frame = 0;
+    else if(player->ent->frame <= player->frames_per_animation-1)
+      player->ent->frame = player->ent->frame+.1;
+  }
 }
 
 void gf2d_player_draw_bb()
@@ -158,46 +190,158 @@ void gf2d_player_draw_bb()
   gf2d_draw_rect(rect,color);
 }
 
+void gf2d_player_set_attack()
+{
+
+  if(!gf2d_key_pressed(SDL_SCANCODE_Q) && !gf2d_key_pressed(SDL_SCANCODE_W) && !gf2d_key_pressed(SDL_SCANCODE_E) && gf2d_key_pressed(SDL_SCANCODE_R) && !gf2d_key_pressed(SDL_SCANCODE_T))
+  {
+    atk = fire;
+  }
+  else if(!gf2d_key_pressed(SDL_SCANCODE_Q) && !gf2d_key_pressed(SDL_SCANCODE_W) && !gf2d_key_pressed(SDL_SCANCODE_E) && !gf2d_key_pressed(SDL_SCANCODE_R) && gf2d_key_pressed(SDL_SCANCODE_T))
+  {
+    atk = lightning;
+  }
+  else if(!gf2d_key_pressed(SDL_SCANCODE_Q) && !gf2d_key_pressed(SDL_SCANCODE_W) && gf2d_key_pressed(SDL_SCANCODE_E) && !gf2d_key_pressed(SDL_SCANCODE_R) && !gf2d_key_pressed(SDL_SCANCODE_T))
+  {
+    atk = rock;
+  }
+  else if(!gf2d_key_pressed(SDL_SCANCODE_Q) && gf2d_key_pressed(SDL_SCANCODE_W) && !gf2d_key_pressed(SDL_SCANCODE_E) && !gf2d_key_pressed(SDL_SCANCODE_R) && !gf2d_key_pressed(SDL_SCANCODE_T))
+  {
+    atk = wind;
+  }
+  else if (gf2d_key_pressed(SDL_SCANCODE_Q) && gf2d_key_pressed(SDL_SCANCODE_W) && !gf2d_key_pressed(SDL_SCANCODE_E) && !gf2d_key_pressed(SDL_SCANCODE_R) && !gf2d_key_pressed(SDL_SCANCODE_T))
+  {
+    atk = icicle;
+  }
+  else if (!gf2d_key_pressed(SDL_SCANCODE_Q) && !gf2d_key_pressed(SDL_SCANCODE_W) && gf2d_key_pressed(SDL_SCANCODE_E) && gf2d_key_pressed(SDL_SCANCODE_R) && !gf2d_key_pressed(SDL_SCANCODE_T))
+  {
+    atk = fireball;
+  }
+  else if(gf2d_key_pressed(SDL_SCANCODE_Q) && !gf2d_key_pressed(SDL_SCANCODE_W) && !gf2d_key_pressed(SDL_SCANCODE_E) && !gf2d_key_pressed(SDL_SCANCODE_R) && !gf2d_key_pressed(SDL_SCANCODE_T))
+  {
+    atk = water;
+  }
+  else
+  {
+    atk = nothing;
+  }
+}
+
 void gf2d_player_attack()
 {
-  if(gf2d_key_pressed(SDL_SCANCODE_R))
+  //slog("atk is %d",atk);
+  if(gf2d_right_released())
   {
-    //slog("rrr");
-    player->fire->shoot = 1;
-    player->lightning->shoot =0;
-    //gf2d_beam_animate(player->fire);
-    //gf2d_fire_animate();
-  }
-  else if(gf2d_key_pressed(SDL_SCANCODE_T))
-  {
-    //slog("lightning");
-    player->lightning->shoot = 1;
-    player->fire->shoot =0;
-    //gf2d_lightning_animate();
-    //gf2d_beam_animate(player->lightning);
-  }
-  else if(gf2d_key_pressed(SDL_SCANCODE_E))
-  {
-
-    if(player->rock_count<player->rock_limit)
+    //slog("released");
+    switch(atk)
     {
-      slog("rock count is %d",player->rock_count);
-      player->rock_count +=1;
-      slog("rock count is %d",player->rock_count);
-      gf2d_rock_shoot(player->playerNum);
+      case fire:
+        break;
+      case water:
+        break;
+      case wind:
+        break;
+      case lightning:
+        break;
+      case rock:
+        if(player->rock_count<player->rock_limit)
+        {
+          player->rock_count +=1;
+          gf2d_rock_shoot(player->playerNum);
+        }
+        break;
+      case fireball:
+        if(player->fireball_count<player->fireball_limit)
+        {
+          player->fireball_count+= 1;
+          gf2d_fireball_shoot(player->playerNum);
+        }
+        break;
+      case icicle:
+        if(player->icicle_count<player->icicle_limit)
+        {
+          player->icicle_count+= 1;
+          gf2d_icicle_shoot(player->playerNum);
+        }
+        break;
+      case nothing:
+        player->lightning->shoot =0;
+        player->fire->shoot =0;
+        player->wind->shoot = 0;
+        player->water->shoot = 0;
+        break;
     }
-    //gf2d_rock_animate();
+  gf2d_set_right_released(false);
+  }
+  else if(gf2d_right_mouse_down())
+  {
+    //slog("rdown");
+    switch(atk)
+    {
+      case fire:
+        player->fire->shoot = 1;
+        player->lightning->shoot =0;
+        player->wind->shoot = 0;
+        player->water->shoot = 0;
+        break;
+      case water:
+        player->water->shoot = 1;
+        player->lightning->shoot =0;
+        player->wind->shoot = 0;
+        player->fire->shoot =0;
+        break;
+      case wind:
+        player->wind->shoot = 1;
+        player->lightning->shoot = 0;
+        player->fire->shoot =0;
+        player->water->shoot = 0;
+        break;
+      case lightning:
+        player->lightning->shoot = 1;
+        player->fire->shoot =0;
+        player->wind->shoot = 0;
+        player->water->shoot = 0;
+        break;
+      case icicle:
+        break;
+      case rock:
+        break;
+      case fireball:
+        break;
+      case nothing:
+        player->lightning->shoot =0;
+        player->fire->shoot =0;
+        player->wind->shoot = 0;
+        player->water->shoot = 0;
+        break;
+    }
   }
   else
   {
     player->lightning->shoot =0;
     player->fire->shoot =0;
+    player->wind->shoot = 0;
+    player->water->shoot = 0;
   }
+
+
+
 }
 
 void gf2d_player_movement(TileMap * map)
 {
   Vector2D velocity;
+  cpVect v = cpBodyGetVelocity(player->ent->body);
+  if(player->ent->colliding == 1 && (fabs(v.x) > 50 || fabs(v.y) > 50))
+  {
+    cpBodySetVelocity(player->ent->body,cpvmult(v,.9));
+    return;
+  }
+  else if(player->ent->colliding == 1 && (fabs(v.x) <= 50 || fabs(v.y) <= 50))
+  {
+    player->ent->colliding = 0;
+  }
+  //slog("force is %f %f",force.x,force.y);
 
   if(gf2d_key_pressed(SDL_SCANCODE_LEFT))
   {
@@ -282,13 +426,18 @@ Player * gf2d_player_get_player(int ind)
   return player;
 }
 
+void gf2d_player_set_invincible(int inv)
+{
+  player->invincible = inv;
+}
+
 cpShapeFilter gf2d_player_filter()
 {
   cpGroup group;
   cpBitmask mask;
   cpBitmask cat;
   cpShapeFilter filter;
-  group = 0;
+  group = 1;
   mask = ENEMIES;
   cat = PLAYER;
   filter = cpShapeFilterNew(group,cat,mask);

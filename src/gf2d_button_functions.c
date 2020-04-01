@@ -12,4 +12,6 @@ void gf2d_button_functions_init()
   gf2d_find_functions_add_func("gf2d_game_state_set_main_menu",&gf2d_game_state_set_main_menu);
   gf2d_find_functions_add_func("gf2d_game_state_set_level_editor",&gf2d_game_state_set_level_editor);
   gf2d_find_functions_add_func("gf2d_game_state_set_game",&gf2d_game_state_set_game);
+  gf2d_find_functions_add_func("gf2d_pause_menu_exit_game",&gf2d_pause_menu_exit_game);
+  //gf2d_find_functions_add_func("gf2d_pause_menu_main_menu",&gf2d_pause_menu_main_menu);
 }

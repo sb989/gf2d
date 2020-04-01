@@ -19,13 +19,13 @@ typedef struct
   Vector2D end;
   Vector2D position;
   float xoffset,yoffset;
-  uint8_t CollisionType;
+  uint32_t CollisionType;
   cpShapeFilter filter;
 }Beam;
 
 void gf2d_beam_init();
 Beam * gf2d_beam_new();
-Beam * gf2d_beam_init_beam(Sprite *s,uint8_t CollisionType,cpShapeFilter filter,int length,float resizex,float resizey,int maxFrame, int radius);
+Beam * gf2d_beam_init_beam(Sprite *s,uint32_t CollisionType,cpShapeFilter filter,int length,float resizex,float resizey,int maxFrame, int radius);
 void gf2d_beam_animate(Beam *b);
 void gf2d_beam_animate_all();
 void gf2d_beam_set_rotation(Beam *b,Vector3D * rotation);

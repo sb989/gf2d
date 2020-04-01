@@ -183,7 +183,7 @@ void gf2d_draw_circle(Vector2D center, int radius, Vector4D color)
         i += gf2d_draw_circle_points(&pointArray[i],center, point);
         if (i + 8 >= radius*8)
         {
-            slog("too many points for circle");
+            //slog("too many points for circle");
             break;
         }
     }

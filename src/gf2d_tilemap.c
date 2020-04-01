@@ -71,7 +71,7 @@ Tile * gf2d_tilemap_init_tile(Sprite * s,Vector2D pos,int frame,int render,TileM
 int gf2d_tilemap_get_end_gp(TileMap *map)
 {
   int egp = map->tiles_per_row - mapManager.num_columns_on_screen;
-  slog("egp is %d",egp);
+  //slog("egp is %d",egp);
   return egp;
 }
 

@@ -4,10 +4,13 @@
 #include "gf2d_ui_button.h"
 #include "gf2d_controls_state.h"
 #include "gf2d_gtk.h"
+#include "gf2d_projectile.h"
+#include "gf2d_enemy.h"
 void gf2d_collision_handlers_add_all(cpSpace * space)
 {
   gf2d_collision_handlers_mouse_button(space);
   gf2d_collision_handlers_player_enemy(space);
+  gf2d_collision_handlers_rock_enemy(space);
 }
 
 void gf2d_collision_handlers_player_enemy(cpSpace *space)
@@ -15,8 +18,16 @@ void gf2d_collision_handlers_player_enemy(cpSpace *space)
   cpCollisionHandler *handler;
   handler = cpSpaceAddCollisionHandler(space,PLAYER,ENEMIES);
   handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_push_back;
+  handler->separateFunc = (cpCollisionSeparateFunc)gf2d_collision_handlers_set_white;
 }
 
+void gf2d_collision_handlers_rock_enemy(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,ROCK,ENEMIES);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_rock_hit;
+  //handler->separateFunc = (cpCollisionSeparateFunc)gf2d_collision_handlers_set_white;
+}
 
 
 void gf2d_collision_handlers_mouse_button(cpSpace * space)
@@ -29,6 +40,33 @@ void gf2d_collision_handlers_mouse_button(cpSpace * space)
   handler->separateFunc = (cpCollisionSeparateFunc)gf2d_collision_handlers_open_file_done;
 }
 
+cpBool gf2d_collision_handlers_rock_hit(cpArbiter *arb,cpSpace *space, void *data)
+{
+  cpBody *body_a,*body_b;
+  cpShape *shape_a,*shape_b;
+  cpCollisionType a,b;
+  //Player *p;
+  Entity *entA,*entB;
+  //slog("collision");
+  cpArbiterGetBodies(arb,&body_a,&body_b);
+  entA = (Entity*)cpBodyGetUserData(body_a);
+  entB = (Entity*)cpBodyGetUserData(body_b);
+  if(entA->_inuse == 0 || entB->_inuse ==0)
+    return false;
+  cpArbiterGetShapes(arb,&shape_a,&shape_b);
+  a = cpShapeGetCollisionType(shape_a);
+  b = cpShapeGetCollisionType(shape_b);
+  if(a == ROCK && b == ENEMIES)
+  {
+    Projectile * proj = gf2d_projectile_get_proj_from_ent(entA);
+    if(proj->destroy == 1)
+      return false;
+    gf2d_projectile_destroy(proj);
+    gf2d_enemy_take_damage(5,entB);
+  }
+  return true;
+}
+
 cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *data)
 {
   cpBody *body_a,*body_b;
@@ -36,7 +74,7 @@ cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *dat
   cpCollisionType a,b;
   //Player *p;
   Entity *entA,*entB;
-  slog("collision");
+  //slog("collision");
   cpArbiterGetBodies(arb,&body_a,&body_b);
   entA = (Entity*)cpBodyGetUserData(body_a);
   entB = (Entity*)cpBodyGetUserData(body_b);
@@ -47,17 +85,50 @@ cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *dat
   b = cpShapeGetCollisionType(shape_b);
   if(a==PLAYER && b==ENEMIES)
   {
+    //slog("player");
 
-    slog("player and enemy colliding");
     gf2d_main_game_set_box_color(vector4d(0,0,0,255));
+    cpVect velocity;
+    cpVect zero = {0,0};
+    if(gf2d_player_get_player(0)->invincible > 0)
+      return false;
+    if(cpveql(cpBodyGetVelocity(body_a),zero))
+    {
+      velocity = cpvnormalize(cpBodyGetVelocity(body_b));
+      velocity = cpvmult(velocity,400);
+    }
+    else if(cpveql(cpBodyGetVelocity(body_b),zero))
+    {
+      if(gf2d_player_get_player(0)->ent->colliding == 1)
+        return false;
+      velocity = cpvnormalize(cpBodyGetVelocity(body_a));
+      velocity = cpvneg(velocity);
+      velocity = cpvmult(velocity,400);
+    }
+    else if(!cpveql(cpBodyGetVelocity(body_a),zero) && !cpveql(cpBodyGetVelocity(body_b),zero))
+    {
+      velocity = cpvnormalize(cpvsub(cpBodyGetVelocity(body_a),cpBodyGetVelocity(body_b)));
+      velocity = cpvneg(velocity);
+      velocity = cpvmult(velocity,400);
+    }
+
+    gf2d_player_get_player(0)->invincible = 1;
+    gf2d_player_get_player(0)->ent->colliding = 1;
+    cpBodySetVelocity(gf2d_player_get_player(0)->ent->body,velocity);
+    //gf2d_player_set_force(force);
+    //cpBodySetForce(body_a,force);
   }
 
   return 0;
 }
 
+
+
 void gf2d_collision_handlers_set_white(cpArbiter * arb,cpSpace *space, void *data)
 {
   gf2d_main_game_set_box_color(vector4d(255,255,255,255));
+
+
 }
 
 cpBool gf2d_collision_handlers_open_file(cpArbiter *arb,cpSpace *space,void *data)

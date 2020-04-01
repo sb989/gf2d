@@ -12,7 +12,6 @@ Beam * gf2d_fire_init()
 //  }
   fire = gf2d_fire_new();
 //  fires = gfc_list_append(fires,fire);
-
   fire->offsetAngle = -270;
   fire->xoffset = -30;
   fire->yoffset = -180;
@@ -22,7 +21,7 @@ Beam * gf2d_fire_init()
 Beam * gf2d_fire_new()
 {
   Sprite *f = gf2d_sprite_load_all("images/shoot_fire_spritesheet2.png",26,60,61);
-  Beam * fire = gf2d_beam_init_beam(f,FIRE,gf2d_fire_filter(),180,3,3,61,100);
+  Beam * fire = gf2d_beam_init_beam(f,FIRE,gf2d_fire_filter(),180,3,3,61,10);
   return fire;
 }
 
@@ -45,7 +44,7 @@ cpShapeFilter gf2d_fire_filter()
   cpBitmask mask;
   cpBitmask cat;
   cpShapeFilter filter;
-  group = 0;
+  group = 1;
   mask = ENEMIES;
   cat = FIRE;
   filter = cpShapeFilterNew(group,cat,mask);

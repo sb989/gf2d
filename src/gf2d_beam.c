@@ -1,6 +1,7 @@
 #include "gf2d_beam.h"
 #include "gf2d_player.h"
 #include "gf2d_lightning.h"
+#include "gf2d_enemy.h"
 
 static List * beams = NULL;
 
@@ -17,7 +18,7 @@ Beam * gf2d_beam_new()
   return temp;
 }
 
-Beam * gf2d_beam_init_beam(Sprite *s,uint8_t CollisionType,cpShapeFilter filter,int length,float resizex,float resizey,int maxFrame, int radius)
+Beam * gf2d_beam_init_beam(Sprite *s,uint32_t CollisionType,cpShapeFilter filter,int length,float resizex,float resizey,int maxFrame, int radius)
 {
   int i,count;
   Beam * b = NULL;
@@ -25,6 +26,7 @@ Beam * gf2d_beam_init_beam(Sprite *s,uint8_t CollisionType,cpShapeFilter filter,
   if(!beams)
   {
     gf2d_beam_init();
+    slog("created beams list");
   }
   count = gfc_list_get_count(beams);
   for(i=0;i<count;i++)
@@ -56,7 +58,7 @@ Beam * gf2d_beam_init_beam(Sprite *s,uint8_t CollisionType,cpShapeFilter filter,
     beams = gfc_list_append(beams,b);
     slog("added new beam to list");
   }
-  else
+  else if(b)
   {
     b->shoot = 0;
     b->_inuse = 1;
@@ -73,6 +75,7 @@ Beam * gf2d_beam_init_beam(Sprite *s,uint8_t CollisionType,cpShapeFilter filter,
     b->rotation = NULL;
     b->offsetAngle = 0;
     b->position = gf2d_player_get_pos();
+    slog("returning an old beam");
   }
   return b;
 }
@@ -113,6 +116,31 @@ void gf2d_beam_animate(Beam *beam)
   else
     b->frame = 0;
   gf2d_draw_line(b->start,b->end, vector4d(255,0,0,255));
+
+  Vector2D s_top,s_bot,e_top,e_bot;
+  cpVect n;
+  n.x = b->start.x - b->end.x;
+  n.y = b->start.y - b->end.y;
+  n = cpvnormalize(n);
+
+  s_top.x = -b->radius*n.y + b->start.x;
+  s_top.y = b->radius*n.x + b->start.y;
+
+  s_bot.x = b->radius*n.y + b->start.x;
+  s_bot.y = -b->radius*n.x + b->start.y;
+
+  e_top.x = s_top.x + n.x*-b->length;
+  e_top.y = s_top.y + n.y*-b->length;
+
+  e_bot.x = s_bot.x + n.x*-b->length;
+  e_bot.y = s_bot.y + n.y*-b->length;
+
+  gf2d_draw_line(b->start,s_top, vector4d(255,0,0,255));
+  gf2d_draw_line(b->start,s_bot, vector4d(255,0,0,255));
+  gf2d_draw_line(s_top,e_top,vector4d(255,0,0,255));
+  gf2d_draw_line(s_bot,e_bot,vector4d(255,0,0,255));
+
+
   gf2d_draw_circle(b->end,b->radius/4,vector4d(255,0,0,255));
 
   //slog("current frame is %f",b->ent->frame);
@@ -139,9 +167,10 @@ void gf2d_beam_update(Beam * b)
   Vector3D * rot;
   float angle;
   float y,x;
-
+  cpVect s_top,s_bot,e_top,e_bot;
   Vector2D * normal;
-
+  if(b->shoot == 0)
+    return;
   Vector2D playerPos = gf2d_player_get_pos();
   Vector2D mousePos = gf2d_mouse_pos();
 
@@ -171,8 +200,34 @@ void gf2d_beam_update(Beam * b)
   b->start.y = start.y;
   b->end.x = end.x;
   b->end.y = end.y;
+
   cpSpaceSegmentQuery(
 	gf2d_physics_get_space(),start,end,b->radius,
+	b->filter,
+	(cpSpaceSegmentQueryFunc)gf2d_beam_space_segment_query,b
+  );
+
+
+  s_top.x = -b->radius*normal->y + b->start.x;
+  s_top.y = b->radius*normal->x + b->start.y;
+
+  s_bot.x = b->radius*normal->y + b->start.x;
+  s_bot.y = -b->radius*normal->x + b->start.y;
+
+  e_top.x = s_top.x + normal->x*-b->length;
+  e_top.y = s_top.y + normal->y*-b->length;
+
+  e_bot.x = s_bot.x + normal->x*-b->length;
+  e_bot.y = s_bot.y + normal->y*-b->length;
+
+  cpSpaceSegmentQuery(
+	gf2d_physics_get_space(),s_top,e_top,b->radius,
+	b->filter,
+	(cpSpaceSegmentQueryFunc)gf2d_beam_space_segment_query,b
+  );
+
+  cpSpaceSegmentQuery(
+	gf2d_physics_get_space(),s_bot,e_bot,b->radius,
 	b->filter,
 	(cpSpaceSegmentQueryFunc)gf2d_beam_space_segment_query,b
   );
@@ -188,13 +243,42 @@ void gf2d_beam_space_segment_query(cpShape *shape, cpFloat t, cpVect n, void *da
   cpCollisionType a;
   Beam *b = (Beam *)data;
   a = cpShapeGetCollisionType(shape);
-  //slog("collision type is %d",a);
-  if(a==ENEMIES)
+  if(b->CollisionType == WATER)
   {
+    slog("i am water ");
+  }
+  if(a==ENEMIES && (b->CollisionType== FIRE || b->CollisionType== LIGHTNING || b->CollisionType == WATER))
+  {
+    slog("fire or lightning");
     gf2d_main_game_set_box_color(vector4d(255,0,0,255));
+    cpBody *enemyBody = cpShapeGetBody(shape);
+    Entity *enemy = (Entity *)cpBodyGetUserData(enemyBody);
+    gf2d_enemy_take_damage(1,enemy);
+  }
+  else if(a==ENEMIES && b->CollisionType == WIND)
+  {
+    cpVect vel;
+    //slog("n is %f %f",n.x,n.y);
+
+    gf2d_main_game_set_box_color(vector4d(255,0,0,255));
+    cpBody *enemyBody = cpShapeGetBody(shape);
+    Entity *enemy = (Entity *)cpBodyGetUserData(enemyBody);
+    if(enemy->knockback == 1)
+      return;
+    enemy->knockback = 1;
+    vel = cpvnormalize(cpBodyGetVelocity(enemyBody));
+    //slog("enemy velocity is %f %f",cpBodyGetVelocity(enemyBody).x,cpBodyGetVelocity(enemyBody).y);
+    vel = cpvneg(vel);
+    //slog("negated normalized enemy velocity is %f %f",vel.x,vel.y);
+    vel = cpvmult(vel,2000);
+    //slog("vel is %f %f",vel.x, vel.y);
+    cpBodySetVelocity(enemy->body,vel);
+    gf2d_enemy_take_damage(.2,enemy);
   }
   else
   {
+    slog("i am nothing");
+    slog("nothings number is %u",b->CollisionType);
     gf2d_main_game_set_box_color(vector4d(255,255,255,255));
   }
 }

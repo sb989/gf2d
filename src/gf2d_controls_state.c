@@ -106,11 +106,18 @@ void gf2d_update_mouse_state()
     }
     else if(cManager.e.type==SDL_MOUSEBUTTONUP)
     {
-      if(cManager.rMouseDown)
+      if(cManager.rMouseDown && !gf2d_right_released())
+      {
         gf2d_set_right_released(true);
-      else
+        cManager.rMouseDown = false;
+      }
+      else if (cManager.rMouseDown && gf2d_right_released())
+      {
         gf2d_set_right_released(false);
-      cManager.rMouseDown = false;
+        cManager.rMouseDown = false;
+      }
+      else if(!cManager.rMouseDown)
+        cManager.rMouseDown = false;
     }
   }
 }
@@ -193,7 +200,11 @@ void gf2d_update_mouse_position(void *ent)
   }
 }
 
-
+void gf2d_mouse_draw(void *ent)
+{
+  Entity *e = (Entity*)ent;
+  gf2d_sprite_draw(e->s,e->position,&(e->scale),NULL,NULL,NULL,NULL,e->colorShift,e->frame);
+}
 
 cpShapeFilter gf2d_mouseFilter()
 {

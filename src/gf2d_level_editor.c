@@ -35,7 +35,7 @@ void gf2d_level_editor_load()
   SDL_GetWindowSize(win,&screen_width,&screen_height);
   gf2d_ui_load("json_files/map_editor.json");
   lea.c = gf2d_image_carousel_init_carousel(screen_width,80,0,0,60);
-  lea.g = gf2d_grid_init_grid(9,16,504,896,170,180);//gf2d_grid_init_grid(18,32,504,896,170,180);
+  lea.g = gf2d_grid_init_grid(18,32,504,896,170,180);
 }
 
 Sprite * gf2d_level_editor_get_selected_sprite()
@@ -111,6 +111,7 @@ void gf2d_level_editor_update()
   if(lea.c)
   {
     //gf2d_image_carousel_reindex(lea.c);
+    //slog("drawing carousel buttons");
     gf2d_image_carousel_draw_lr(lea.c);
 
   }

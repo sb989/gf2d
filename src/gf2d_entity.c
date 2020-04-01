@@ -17,18 +17,44 @@ void gf2d_entity_init_manager()
   atexit(gf2d_entity_close);
 }
 
-Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos, uint8_t CollisionType,cpShapeFilter filter,Vector2D scale,Vector2D collisionBoxDim)
+Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos, uint32_t CollisionType,cpShapeFilter filter,Vector2D scale,Vector2D collisionBoxDim)
 {
   if(entManager.count == entManager.size)
   {
     slog("max entitities created");
     return NULL;
   }
-  Entity * temp = (Entity *)malloc(sizeof(Entity));
+  int i,count;
+  Entity * temp = NULL;
+  count = gfc_list_get_count(entManager.entList);
+  for(i = 0;i<count;i++)
+  {
+    temp = gfc_list_get_nth(entManager.entList,i);
+    if(temp->_inuse == 1)
+      temp = NULL;
+    else
+    {
+      slog("entitys name is %s",temp->name);
+    }
+      break;
+  }
+  if(temp == NULL)
+  {
+    temp = (Entity *)malloc(sizeof(Entity));
+  }
+  else//players inuse is set to 0 in the beginning so this needs to be fixed
+  {// because it is currenlty delting players body and shape
+    cpSpace * space = gf2d_physics_get_space();
+    cpSpaceRemoveShape(space, temp->shape);
+    cpSpaceRemoveBody(space, temp->body);
+    cpShapeFree(temp->shape);
+    cpBodyFree(temp->body);
+  }
   //Uint8 CollisionType = 0;
   temp->colorShift = NULL;
   temp->name = name;
   temp->s = s;
+  temp->hp = 10;
   temp->position = pos;
   temp->_inuse = 0;
   temp->frame = 0;
@@ -38,6 +64,8 @@ Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos, uint8_t CollisionT
   temp->animate = &gf2d_entity_animate;
   temp->animateData = temp;
   temp->scale = scale;
+  temp->colliding = 0;
+  temp->knockback = 0;
   cpFloat length,width,radius;
   length = s->frame_h;
   width = s->frame_w;
@@ -48,7 +76,7 @@ Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos, uint8_t CollisionT
   return temp;
 }
 
-Entity * gf2d_entity_setup_collision_body(Entity *e,int length,int width,int radius, int type,uint8_t CollisionType,cpShapeFilter filter,Vector2D p)
+Entity * gf2d_entity_setup_collision_body(Entity *e,int length,int width,int radius, int type,uint32_t CollisionType,cpShapeFilter filter,Vector2D p)
 {
   cpVect pos;
   pos.x = p.x;
@@ -99,14 +127,16 @@ void gf2d_entity_animate_all()
   {
     //slog("animating entity %d",i);
     e = gfc_list_get_nth(entManager.entList,i);
-    //slog("entities name is %s",e->name);
-    e->animate(e->animateData);
+    if(e->animate !=NULL)
+      e->animate(e->animateData);
   }
 }
 
 void gf2d_entity_animate(void *ent)
 {
   Entity *e = (Entity *)ent;
+  if(e->_inuse == 0)
+    return;
   gf2d_entity_draw(e);
   if(e->frame + .1< e->maxFrame)
     e->frame +=.1;
@@ -117,6 +147,8 @@ void gf2d_entity_animate(void *ent)
 void gf2d_entity_draw(void *ent)
 {
   Entity * e= (Entity*)ent;
+  if(e->_inuse == 0)
+    return;
   gf2d_sprite_draw(e->s,e->position,&(e->scale),NULL,NULL,NULL,NULL,e->colorShift,e->frame);//e->frame);
 }
 

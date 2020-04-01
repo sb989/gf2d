@@ -135,6 +135,10 @@ void gf2d_grid_draw()
     gf2d_grid_draw_grid(g);
     gf2d_grid_draw_buttons(g);
   }
+  else
+  {
+    slog("no grid");
+  }
 
 }
 

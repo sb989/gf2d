@@ -9,7 +9,7 @@ void gf2d_projectile_init()
   atexit(gf2d_projectile_close);
 }
 
-Projectile * gf2d_projectile_init_projectile(Sprite *s,uint8_t CollisionType,cpShapeFilter filter,float resizex,float resizey,int maxFrame,int owner,Vector2D pos)
+Projectile * gf2d_projectile_init_projectile(Sprite *s,uint32_t CollisionType,cpShapeFilter filter,float resizex,float resizey,int maxFrame,int owner,Vector2D pos,float range)
 {
   int i,count;
   Projectile * proj = NULL;
@@ -44,7 +44,12 @@ Projectile * gf2d_projectile_init_projectile(Sprite *s,uint8_t CollisionType,cpS
      proj->rotation = NULL;
      proj->xoffset = 0;
      proj->yoffset = 0;
+     proj->destroy = 0;
      proj->owner = owner;
+     proj->destStart = maxFrame;
+     proj->range = range;
+     proj->shadowFrame = -1;
+     proj->startFrame = 0;
      //proj->originalPos = originalPos;
      projectiles = gfc_list_append(projectiles,proj);
    }
@@ -67,6 +72,12 @@ Projectile * gf2d_projectile_init_projectile(Sprite *s,uint8_t CollisionType,cpS
      proj->xoffset = 0;
      proj->yoffset = 0;
      proj->owner = owner;
+     proj->destroy = 0;
+     proj->destStart = maxFrame;
+     proj->range = range;
+     proj->shadowFrame = -1;
+     proj->startFrame = 0;
+
    }
 
   return proj;
@@ -77,6 +88,20 @@ Projectile * gf2d_projectile_new()
   Projectile * proj = (Projectile *)malloc(sizeof(Projectile));
   //proj->_inuse = 0;
   return proj;
+}
+
+Projectile * gf2d_projectile_get_proj_from_ent(Entity *e)
+{
+  int i,count;
+  Projectile * proj;
+  count = gfc_list_get_count(projectiles);
+  for(i=0;i<count;i++)
+  {
+    proj = gfc_list_get_nth(projectiles,i);
+    if(proj->ent == e)
+      return proj;
+  }
+  return NULL;
 }
 
 void gf2d_projectile_animate(void *projectile)
@@ -97,12 +122,35 @@ void gf2d_projectile_animate(void *projectile)
   v2->y = proj->resizey;
   draw.x = proj->ent->position.x + proj->xoffset;
   draw.y = proj->ent->position.y + proj->yoffset;
+  //slog("draw pos is %f %f",draw.x,draw.y);
+  //slog("player pos is %f %f",gf2d_player_get_pos().x, gf2d_player_get_pos().y);
+  if(proj->shadowFrame > -1)
+  {
+    gf2d_sprite_draw(proj->ent->s,draw,v2,NULL,NULL,proj->rotation,NULL,proj->colorShift,(int)proj->shadowFrame);
+
+  }
   gf2d_sprite_draw(proj->ent->s,draw,v2,NULL,NULL,proj->rotation,NULL,proj->colorShift,(int)proj->ent->frame);
-  if(proj->ent->frame < proj->maxFrame)
-    proj->ent->frame = proj->ent->frame + .2;
-  else
-    proj->ent->frame = 0;
-  //slog("current frame is %f",proj->ent->frame);
+  //slog("just drew frame %f",proj->ent->frame);
+
+  if(proj->destroy != 1 && proj->ent->frame < proj->destStart-1)
+    proj->ent->frame = proj->ent->frame + .05;
+  else if(proj->destroy != 1 && proj->ent->frame >= proj->destStart-1)
+  {
+    proj->ent->frame = proj->startFrame;
+  }
+  else if(proj->destroy ==1 && proj->ent->frame < proj->maxFrame-1)
+  {
+    proj->ent->frame = proj->ent->frame + .1;
+  }
+  else if(proj->destroy == 1 && proj->ent->frame >= proj->maxFrame-1)
+  {
+
+    proj->_inuse = 0;
+    proj->ent->_inuse = 0;
+    proj->count(proj);
+    proj->destroy = 0;
+    //slog("done drawing");
+  }
   free(v2);
 }
 
@@ -111,9 +159,9 @@ void gf2d_projectile_update(void * projectile)
   cpVect pos;
   float magnitude;
   Projectile *proj = (Projectile*)projectile;
-  if(proj->ent->_inuse == 0)
+  if(proj->ent->_inuse == 0 || proj->destroy  ==1)
   {
-    //slog("ent inuse is 0 returning");
+    //slog("ent inuse is 0  or destroy is 1; returning");
     return;
   }
 
@@ -125,7 +173,7 @@ void gf2d_projectile_update(void * projectile)
 //  slog("original pos is %f %f",proj->originalPos.x,proj->originalPos.y);
 //  slog("current pos after update is %f %f",proj->ent->position.x,proj->ent->position.y);
   //slog("distance between start and current is %f",magnitude);
-  if(magnitude > 200)
+  if(magnitude > proj->range)
   {
     gf2d_projectile_destroy(proj);
   }
@@ -171,14 +219,11 @@ void gf2d_projectile_shoot(float speed,Projectile *proj)
 void gf2d_projectile_destroy(Projectile *proj)
 {
   cpVect velocity;
-  Player *player;
-  player = gf2d_player_get_player(proj->owner);
   velocity.x = 0;
   velocity.y = 0;
   cpBodySetVelocity(proj->ent->body,velocity);
-  proj->_inuse = 0;
-  proj->ent->_inuse = 0;
-  player->rock_count = player->rock_count -1;
+  proj->destroy = 1;
+
 }
 
 void gf2d_projectile_set_rotation(Projectile *proj,Vector3D * rotation)

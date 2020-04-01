@@ -20,5 +20,6 @@ SDL_Event gf2d_get_event();
 void gf2d_update_mouse_state();
 void gf2d_set_mouse_colliding(Bool m);
 SDL_KeyboardEvent gf2d_get_keyboard_event();
+void gf2d_mouse_draw(void *ent);
 
 #endif

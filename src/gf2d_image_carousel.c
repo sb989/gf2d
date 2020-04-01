@@ -320,20 +320,28 @@ void gf2d_image_carousel_draw_lr(Carousel *c)
   if(c->left)
   {
     s = c->left->boxInfo;
-
-    v2->x = (float)s->resizex;
+    gf2d_ui_box_draw(s);
+    /*v2->x = (float)s->resizex;
     v2->y = (float)s->resizey;
     gf2d_sprite_draw(s->s,vector2d(s->posx,s->posy),v2,NULL,
     NULL,NULL,NULL,NULL,s->sprite_num);
+    */
   }
   if(c->right)
   {
+    s = c->right->boxInfo;
+    gf2d_ui_box_draw(s);
+    /*
     s = c->right->boxInfo;
     v2->x = (float)s->resizex;
     v2->y = (float)s->resizey;
     gf2d_sprite_draw(s->s,vector2d(s->posx,s->posy),v2,NULL,
     NULL,NULL,NULL,NULL,s->sprite_num);
-
+    */
+  }
+  if(c->right == NULL && c->left ==NULL)
+  {
+    slog("both things null");
   }
 
   free(v2);

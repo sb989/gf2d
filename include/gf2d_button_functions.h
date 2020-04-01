@@ -5,6 +5,7 @@
 #include "gf2d_gtk.h"
 #include "gf2d_level_editor.h"
 #include "gf2d_game_state.h"
+#include "gf2d_pause_menu.h"
 void gf2d_button_functions_init();
 
 

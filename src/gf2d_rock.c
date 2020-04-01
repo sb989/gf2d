@@ -18,14 +18,26 @@ Projectile * gf2d_rock_init(int player)
   rock->offsetAngle = 0;
   rock->xoffset = 0;
   rock->yoffset = -30;
+  rock->startFrame = rock->ent->frame = 1;
+  rock->shadowFrame = 0;
+  rock->destStart = 5;
+  rock->count = &gf2d_rock_lower_count;
   return rock;
+}
+
+void gf2d_rock_lower_count(void * p)
+{
+  Player *player;
+  Projectile * proj = (Projectile*)p;
+  player = gf2d_player_get_player(proj->owner);
+  player->rock_count = player->rock_count -1;
 }
 
 Projectile * gf2d_rock_new(int player)
 {
   Sprite *r = gf2d_sprite_load_all("images/rock.png",63,61,7);
-  Projectile * rock = gf2d_projectile_init_projectile(r,ROCK,gf2d_rock_filter(),1,1,7,player,gf2d_player_get_pos());
-  rocks = gfc_list_append(rocks,rock);
+  Projectile * rock = gf2d_projectile_init_projectile(r,ROCK,gf2d_rock_filter(),1,1,7,player,gf2d_player_get_pos(),150);
+  //rocks = gfc_list_append(rocks,rock);
   return rock;
 }
 
@@ -55,7 +67,7 @@ cpShapeFilter gf2d_rock_filter()
   cpBitmask mask;
   cpBitmask cat;
   cpShapeFilter filter;
-  group = 0;
+  group = 1;
   mask = ENEMIES;
   cat = ROCK;
   filter = cpShapeFilterNew(group,cat,mask);
