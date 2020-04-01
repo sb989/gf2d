@@ -11,6 +11,8 @@ void gf2d_collision_handlers_add_all(cpSpace * space)
   gf2d_collision_handlers_mouse_button(space);
   gf2d_collision_handlers_player_enemy(space);
   gf2d_collision_handlers_rock_enemy(space);
+  gf2d_collision_handlers_icicle_enemy(space);
+  gf2d_collision_handlers_fireball_enemy(space);
 }
 
 void gf2d_collision_handlers_player_enemy(cpSpace *space)
@@ -25,11 +27,25 @@ void gf2d_collision_handlers_rock_enemy(cpSpace *space)
 {
   cpCollisionHandler *handler;
   handler = cpSpaceAddCollisionHandler(space,ROCK,ENEMIES);
-  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_rock_hit;
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_proj_hit;
   //handler->separateFunc = (cpCollisionSeparateFunc)gf2d_collision_handlers_set_white;
 }
 
+void gf2d_collision_handlers_icicle_enemy(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,ICICLE,ENEMIES);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_proj_hit;
+  //handler->separateFunc = (cpCollisionSeparateFunc)gf2d_collision_handlers_set_white;
+}
 
+void gf2d_collision_handlers_fireball_enemy(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,FIREBALL,ENEMIES);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_proj_hit;
+  //handler->separateFunc = (cpCollisionSeparateFunc)gf2d_collision_handlers_set_white;
+}
 void gf2d_collision_handlers_mouse_button(cpSpace * space)
 {
   cpCollisionHandler *handler;
@@ -40,7 +56,9 @@ void gf2d_collision_handlers_mouse_button(cpSpace * space)
   handler->separateFunc = (cpCollisionSeparateFunc)gf2d_collision_handlers_open_file_done;
 }
 
-cpBool gf2d_collision_handlers_rock_hit(cpArbiter *arb,cpSpace *space, void *data)
+
+
+cpBool gf2d_collision_handlers_proj_hit(cpArbiter *arb,cpSpace *space, void *data)
 {
   cpBody *body_a,*body_b;
   cpShape *shape_a,*shape_b;
@@ -56,7 +74,7 @@ cpBool gf2d_collision_handlers_rock_hit(cpArbiter *arb,cpSpace *space, void *dat
   cpArbiterGetShapes(arb,&shape_a,&shape_b);
   a = cpShapeGetCollisionType(shape_a);
   b = cpShapeGetCollisionType(shape_b);
-  if(a == ROCK && b == ENEMIES)
+  if((a == ROCK || a == ICICLE || a == FIREBALL)&& b == ENEMIES)
   {
     Projectile * proj = gf2d_projectile_get_proj_from_ent(entA);
     if(proj->destroy == 1)

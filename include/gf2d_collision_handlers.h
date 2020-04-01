@@ -31,7 +31,9 @@ void gf2d_collision_handlers_fire_enemy(cpSpace *space);
 void gf2d_collision_handlers_lightning_enemy(cpSpace *space);
 cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *data);
 void gf2d_collision_handlers_set_white(cpArbiter * arb,cpSpace *space, void *data);
-cpBool gf2d_collision_handlers_rock_hit(cpArbiter *arb,cpSpace *space, void *data);
+cpBool gf2d_collision_handlers_proj_hit(cpArbiter *arb,cpSpace *space, void *data);
 void gf2d_collision_handlers_rock_enemy(cpSpace *space);
+void gf2d_collision_handlers_icicle_enemy(cpSpace *space);
+void gf2d_collision_handlers_fireball_enemy(cpSpace *space);
 
 #endif
