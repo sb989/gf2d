@@ -110,6 +110,18 @@ void gf2d_enemy_take_damage(int dmg,Entity *e)
   }
 }
 
+void gf2d_enemy_drop_coin(cpSpace *space, Entity *e, void *unused)
+{
+  if(e->hp <=0)
+  {
+    Sprite *s = gf2d_sprite_load_all("images/coin.jpg",800,800,1);
+    Entity * c = gf2d_entity_new("coin",s,e->position,COIN,gf2d_coin_filter(),vector2d(.01,.01),vector2d(.01*s->frame_w,.01*s->frame_h));
+    c->_inuse = 1;
+    c->colorShift = e->colorShift;
+  }
+
+}
+
 void gf2d_enemy_update(void *enemy)
 {
   Entity *e = (Entity *)enemy;
@@ -154,6 +166,7 @@ void gf2d_enemy_update(void *enemy)
   vel = cpvnormalize(vel);
   vel = cpvmult(vel,70);
   vel = cpvneg(vel);
+  vel = cpvadd(vel,gf2d_main_game_get_velocity_offset());
   cpBodySetVelocity(e->body,vel);
   //slog("vel is %f %f",vel.x,vel.y);
 }
@@ -167,6 +180,19 @@ cpShapeFilter gf2d_enemy_filter()
   group = 2;
   mask = PLAYER|LIGHTNING|FIRE|WIND|ROCK|WATER|FIREBALL|ICICLE;
   cat = ENEMIES;
+  filter = cpShapeFilterNew(group,cat,mask);
+  return filter;
+}
+
+cpShapeFilter gf2d_coin_filter()
+{
+  cpGroup group;
+  cpBitmask mask;
+  cpBitmask cat;
+  cpShapeFilter filter;
+  group = 2;
+  mask = PLAYER;
+  cat = COIN;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;
 }

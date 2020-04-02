@@ -9,6 +9,7 @@ typedef struct
   int height,width;
   Sprite *sprite;
   //BoxInfo * box;
+  Vector4D color;
   Vector2D pos;
   char * text;
 }TextBox;
@@ -16,12 +17,12 @@ typedef struct
 void gf2d_ui_textbox_init();
 void gf2d_ui_textbox_load(SJson * textboxes);
 TextBox * gf2d_ui_textbox_new();
-TextBox *gf2d_ui_textbox_init_textbox(char * file_location,int height,int width,char * text,int posx,int posy);
+TextBox *gf2d_ui_textbox_init_textbox(char * file_location,int height,int width,char * text,int posx,int posy,Vector4D color);
 void gf2d_ui_textbox_draw(TextBox * txt);
 void gf2d_ui_textbox_close();
 void gf2d_ui_textbox_draw_all();
 int gf2d_ui_textbox_letter_pos(char c);
-Sprite * gf2d_ui_textbox_load_sprite(char * text,char * file_location,int h);
+Sprite * gf2d_ui_textbox_load_sprite(char * text,char * file_location,int h,Vector4D c);
 void gf2d_ui_textbox_clear_list();
 
 #endif

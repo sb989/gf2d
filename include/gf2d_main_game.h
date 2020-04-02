@@ -12,6 +12,9 @@ void gf2d_main_game_set_box_color(Vector4D color);
 void gf2d_main_game_set_paused(int p);
 void gf2d_main_game_init_ui();
 int gf2d_main_game_get_paused();
+void gf2d_main_game_set_velocity_offset(cpVect vel);
+cpVect gf2d_main_game_get_velocity_offset();
+void gf2d_main_game_update_ui();
 
 
 #endif

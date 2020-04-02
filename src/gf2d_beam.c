@@ -245,22 +245,23 @@ void gf2d_beam_space_segment_query(cpShape *shape, cpFloat t, cpVect n, void *da
   a = cpShapeGetCollisionType(shape);
   if(b->CollisionType == WATER)
   {
-    slog("i am water ");
+    //slog("i am water ");
   }
   if(a==ENEMIES && (b->CollisionType== FIRE || b->CollisionType== LIGHTNING || b->CollisionType == WATER))
   {
-    slog("fire or lightning");
-    gf2d_main_game_set_box_color(vector4d(255,0,0,255));
+    //slog("fire or lightning");
+    //gf2d_main_game_set_box_color(vector4d(255,0,0,255));
     cpBody *enemyBody = cpShapeGetBody(shape);
     Entity *enemy = (Entity *)cpBodyGetUserData(enemyBody);
     gf2d_enemy_take_damage(1,enemy);
+    cpSpaceAddPostStepCallback(gf2d_physics_get_space(), (cpPostStepFunc)gf2d_enemy_drop_coin,enemy, NULL);
   }
   else if(a==ENEMIES && b->CollisionType == WIND)
   {
     cpVect vel;
     //slog("n is %f %f",n.x,n.y);
 
-    gf2d_main_game_set_box_color(vector4d(255,0,0,255));
+    //gf2d_main_game_set_box_color(vector4d(255,0,0,255));
     cpBody *enemyBody = cpShapeGetBody(shape);
     Entity *enemy = (Entity *)cpBodyGetUserData(enemyBody);
     if(enemy->knockback == 1)
@@ -274,13 +275,15 @@ void gf2d_beam_space_segment_query(cpShape *shape, cpFloat t, cpVect n, void *da
     //slog("vel is %f %f",vel.x, vel.y);
     cpBodySetVelocity(enemy->body,vel);
     gf2d_enemy_take_damage(.2,enemy);
+    cpSpaceAddPostStepCallback(gf2d_physics_get_space(), (cpPostStepFunc)gf2d_enemy_drop_coin,enemy, NULL);
   }
   else
   {
-    slog("i am nothing");
-    slog("nothings number is %u",b->CollisionType);
-    gf2d_main_game_set_box_color(vector4d(255,255,255,255));
+    //slog("i am nothing");
+    //slog("nothings number is %u",b->CollisionType);
+    //gf2d_main_game_set_box_color(vector4d(255,255,255,255));
   }
+
 }
 
 void gf2d_beam_set_rotation(Beam *b,Vector3D * rotation)

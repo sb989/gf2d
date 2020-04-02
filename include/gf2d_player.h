@@ -3,7 +3,7 @@
 #include "gf2d_entity.h"
 #include "gf2d_controls_state.h"
 #include "gf2d_beam.h"
-
+#include <time.h>
 #include "gf2d_tilemap.h"
 
 typedef struct
@@ -18,6 +18,9 @@ typedef struct
   int fireball_limit,fireball_count;
   int playerNum;
   int invincible;
+  Vector2D dir;
+  float dist;
+  clock_t lastUpdate;
 }Player;
 
 void gf2d_player_init();
@@ -32,8 +35,8 @@ void gf2d_player_close();
 void gf2d_player_update_position();
 Vector2D gf2d_player_get_pos();
 void gf2d_player_set_pos(Vector2D pos);
-void gf2d_player_set_x_velocity(Vector2D velocity);
-void gf2d_player_set_y_velocity(Vector2D velocity);
+void gf2d_player_set_x_velocity(float x);
+void gf2d_player_set_y_velocity(float y);
 float gf2d_player_get_draw_height();
 float gf2d_player_get_draw_width();
 void gf2d_player_attack();
@@ -42,4 +45,8 @@ void gf2d_player_draw_bb();
 Player * gf2d_player_get_player(int ind);
 void gf2d_player_set_invincible(int inv);
 void gf2d_player_set_attack();
+void gf2d_player_take_damage(int dmg);
+int gf2d_player_get_hp();
+void gf2d_player_set_hp(int hp);
+
 #endif

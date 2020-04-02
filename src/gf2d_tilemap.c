@@ -7,8 +7,8 @@ typedef struct
   int num_rows_on_screen;
   int resx,resy;
   int tile_width,tile_height;
-  Vector2D global_pos; //current position of the upper and leftmost tile in the entire map
-  int gp;
+  Vector2D global_pos; //current position of the upper and leftmost tile in the entire map <---never used
+  int gp;// the index of the upper and leftmost tile on screen(has to be dvided by ten to get the actual value)
 }TileMapManager;
 
 

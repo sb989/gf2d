@@ -19,6 +19,7 @@ void gf2d_ui_textbox_load(SJson * textboxes)
   int i,count,height,width,posx,posy;
   char *file_location,*text;
   SJson *value;
+  Vector4D color;
 
   count = sj_array_get_count(textboxes);
   //slog("count is %d",count);
@@ -29,10 +30,24 @@ void gf2d_ui_textbox_load(SJson * textboxes)
     width = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"width"));
     file_location = gf2d_ui_helper_functions_get_object_value_as_string(value,"font-filename");
     text = gf2d_ui_helper_functions_get_object_value_as_string(value,"text");
-    //slog(text);
+
+    if(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.x") !=NULL)
+    {
+      color.x = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.x"));
+      color.y = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.y"));
+      color.z = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.z"));
+      color.w = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"color.w"));
+    }
+    else
+    {
+      color.x = color.y = color.z = 0;
+      color.w = 255;
+    }
+
+
     posx = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"posx"));
     posy = atoi(gf2d_ui_helper_functions_get_object_value_as_string(value,"posy"));
-    gf2d_ui_textbox_init_textbox(file_location,height,width,text,posx,posy);
+    gf2d_ui_textbox_init_textbox(file_location,height,width,text,posx,posy,color);
   }
 }
 
@@ -47,7 +62,7 @@ TextBox * gf2d_ui_textbox_new()
   return text;
 }
 
-TextBox *gf2d_ui_textbox_init_textbox(char * file_location,int height,int width,char * text,int posx,int posy)
+TextBox *gf2d_ui_textbox_init_textbox(char * file_location,int height,int width,char * text,int posx,int posy,Vector4D color)
 {
   //Sprite * sprite;
   //BoxInfo * box;
@@ -61,19 +76,18 @@ TextBox *gf2d_ui_textbox_init_textbox(char * file_location,int height,int width,
   txt->width = width;
   txt->pos.x = posx;
   txt->pos.y = posy;
-
-
-  txt->sprite = gf2d_ui_textbox_load_sprite(text,file_location,height);
+  txt->color = color;
+  txt->sprite = gf2d_ui_textbox_load_sprite(text,file_location,height,color);
   return txt;
 }
 
-Sprite * gf2d_ui_textbox_load_sprite(char * text,char * file_location,int h)
+Sprite * gf2d_ui_textbox_load_sprite(char * text,char * file_location,int h,Vector4D c)
 {
   Sprite *s;
   TTF_Font * font;
   SDL_Surface * textSurface;
   SDL_Texture * texture;
-  SDL_Color color = {0,0,0};
+  SDL_Color color = {c.x,c.y,c.z,c.w};
   int width,height;
   font = TTF_OpenFont(file_location,h);
   if(text==NULL || strcmp(text,"")==0 )

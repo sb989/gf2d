@@ -14,7 +14,8 @@ static int playerCount = 0;
 enum attack{rock,water,fire,lightning,wind,icicle,fireball,nothing};
 static enum attack atk;
 //void gf2d_player_movement(TileMap * map);
-
+static float time_elap = 0;
+static Vector2D dist_t;
 void gf2d_player_init()
 {
   player = gf2d_player_new_player();
@@ -44,6 +45,9 @@ void gf2d_player_init()
   direction = forw;
   atk = nothing;
   player->playerNum = playerCount;
+  player->dist = 0.0f;
+  player->lastUpdate = 0;
+  player->ent->hp = 10;
   playerCount = playerCount +1;
   atexit(gf2d_player_close);
 }
@@ -57,6 +61,24 @@ Player * gf2d_player_new_player()
 {
   Player * temp = (Player*)malloc(sizeof(Player));
   return temp;
+}
+
+void gf2d_player_take_damage(int dmg)
+{
+  player->ent->hp = player->ent->hp - dmg;
+  gf2d_main_game_update_ui();
+  if(player->ent->hp == 0)
+    gf2d_game_state_set_game_over();
+}
+
+void gf2d_player_set_hp(int hp)
+{
+  player->ent->hp = hp;
+}
+
+int gf2d_player_get_hp()
+{
+  return player->ent->hp;
 }
 
 void gf2d_player_update_position()
@@ -90,19 +112,19 @@ float gf2d_player_get_draw_width()
   return player->draw_width;
 }
 
-void gf2d_player_set_x_velocity(Vector2D velocity)
+void gf2d_player_set_x_velocity(float x)
 {
   cpVect pos;
-  pos.x = velocity.x;
-  //pos.y = velocity.y;
+  pos.x = x;
+  pos.y = cpBodyGetVelocity(player->ent->body).y;
   cpBodySetVelocity(player->ent->body,pos);
 }
 
-void gf2d_player_set_y_velocity(Vector2D velocity)
+void gf2d_player_set_y_velocity(float y)
 {
   cpVect pos;
-  //pos.x = velocity.x;
-  pos.y = velocity.y;
+  pos.x = cpBodyGetVelocity(player->ent->body).x;
+  pos.y = y;
   cpBodySetVelocity(player->ent->body,pos);
 }
 
@@ -230,6 +252,7 @@ void gf2d_player_set_attack()
 void gf2d_player_attack()
 {
   //slog("atk is %d",atk);
+  gf2d_controls_update();
   if(gf2d_right_released())
   {
     //slog("released");
@@ -324,14 +347,24 @@ void gf2d_player_attack()
     player->water->shoot = 0;
   }
 
-
-
 }
 
 void gf2d_player_movement(TileMap * map)
 {
   Vector2D velocity;
+  cpVect e_offset;
+  float y,x;
+  Vector2D * normal;
   cpVect v = cpBodyGetVelocity(player->ent->body);
+  Vector2D playerPos,mousePos;
+  int speed = 250;
+  float timeD;
+
+  if(player->lastUpdate > 0)
+    timeD = SDL_GetTicks() - player->lastUpdate;
+  else
+    timeD = 0;
+
   if(player->ent->colliding == 1 && (fabs(v.x) > 50 || fabs(v.y) > 50))
   {
     cpBodySetVelocity(player->ent->body,cpvmult(v,.9));
@@ -341,84 +374,134 @@ void gf2d_player_movement(TileMap * map)
   {
     player->ent->colliding = 0;
   }
-  //slog("force is %f %f",force.x,force.y);
 
-  if(gf2d_key_pressed(SDL_SCANCODE_LEFT))
+  gf2d_controls_update();
+
+  if(gf2d_left_mouse_down())
   {
-    if(gf2d_player_get_pos().x <=100 && gf2d_tilemap_get_gp()!=0)
+    playerPos = gf2d_player_get_pos();
+    mousePos = gf2d_mouse_pos();
+    //slog("playerpos is %f %f",playerPos.x,playerPos.y);
+    if(vector2d_distance_between_less_than(playerPos,mousePos,10))
     {
-      velocity.x = 0;
-      gf2d_player_set_x_velocity(velocity);
+      //gf2d_set_left_released(false);
+      gf2d_player_set_x_velocity(0);
+      gf2d_player_set_y_velocity(0);
+      return;
+    }
+    player->dist = vector2d_magnitude_between(mousePos,playerPos);
+    y = (mousePos.y - playerPos.y);
+    x = (mousePos.x - playerPos.x);
+    //slog("dist is %f",player->dist);
+
+    time_elap = SDL_GetTicks();//clock();
+    //slog("time is %f",time_elap/CLOCKS_PER_SEC);
+    dist_t = playerPos;
+    normal = (Vector2D*)malloc(sizeof(Vector2D));
+    normal->x = x;
+    normal->y = y;
+    vector2d_normalize(normal);
+    player->dir.x = normal->x;
+    player->dir.y = normal->y;
+    //slog("dir is %f %f",player->dir.x,player->dir.y);
+    velocity.x = normal->x *speed;
+    velocity.y = normal->y *speed;
+    //slog("velocity is %f %f",velocity.x,velocity.y);
+    gf2d_player_set_x_velocity(velocity.x);
+    gf2d_player_set_y_velocity(velocity.y);
+    if(fabs(velocity.x) > fabs(velocity.y) )
+    {
+      if(velocity.x > 0)
+        gf2d_player_set_right();
+      else if(velocity.x < 0)
+        gf2d_player_set_left();
+    }
+    else
+    {
+      if(velocity.y > 0)
+        gf2d_player_set_forw();
+      else if(velocity.y <0)
+        gf2d_player_set_back();
+    }
+    //gf2d_set_left_released(false);
+    timeD = 0;
+  }
+  Vector2D d;
+  vector2d_scale(d,player->dir,speed*1.6);
+  vector2d_scale(d,d,timeD/1000);
+  player->dist = player->dist - vector2d_magnitude(d);
+  //slog("magnitude of d is %f",vector2d_magnitude(d));
+  if(player->dist <=0)
+  {
+    if(player->dir.x > 0 || player->dir.y>0)
+    {
+      vector2d_sub(dist_t,gf2d_player_get_pos(),dist_t);
+      //slog("playerPos is %f %f",gf2d_player_get_pos().x,gf2d_player_get_pos().y);
+      //slog("change in distance is %f",vector2d_magnitude(dist_t));
+      //slog("change in time is %f",(SDL_GetTicks()-time_elap)/1000);
+    }
+    gf2d_player_set_x_velocity(0);
+    gf2d_player_set_y_velocity(0);
+    player->dir.x = 0;
+    player->dir.y = 0;
+    player->dist = 0;
+    gf2d_main_game_set_velocity_offset(cpv(0,0));
+    return;
+  }
+  if(player->dir.x < 0)
+  {
+    if(gf2d_player_get_pos().x <= 420 && gf2d_tilemap_get_gp()!=0 )
+    {
+      gf2d_player_set_x_velocity(0);
       gf2d_tilemap_move_left(map);
+      gf2d_main_game_set_velocity_offset(cpv(250,0));
     }
-    else if(gf2d_player_get_pos().x <=100 && gf2d_tilemap_get_gp()==0)
+    else if(gf2d_player_get_pos().x <= 420 && gf2d_tilemap_get_gp() == 0)
     {
-      velocity.x = -150;
-      gf2d_player_set_x_velocity(velocity);
+      gf2d_player_set_x_velocity(speed*player->dir.x);
+      gf2d_main_game_set_velocity_offset(cpv(0,0));
     }
-    else if(gf2d_player_get_pos().x >100)// && gf2d_tilemap_get_gp()!=0)
+    else if(gf2d_player_get_pos().x > 420)
     {
-      velocity.x = -150;
-      gf2d_player_set_x_velocity(velocity);
+      gf2d_player_set_x_velocity(speed*player->dir.x);
+      gf2d_main_game_set_velocity_offset(cpv(0,0));
     }
     else
     {
-      velocity.x = 0;
-      gf2d_player_set_x_velocity(velocity);
+      gf2d_player_set_x_velocity(0);
+      gf2d_main_game_set_velocity_offset(cpv(0,0));
     }
-    gf2d_player_set_left();
   }
-  else if(gf2d_key_pressed(SDL_SCANCODE_RIGHT))
+  else if(player->dir.x > 0)
   {
-    if(gf2d_player_get_pos().x >=1180 && gf2d_tilemap_get_gp()!=gf2d_tilemap_get_end_gp(map)*10)
+    if(gf2d_player_get_pos().x >=860 && gf2d_tilemap_get_gp()!=gf2d_tilemap_get_end_gp(map)*10)
     {
-      //slog("right1");
-      velocity.x = 0;
-      gf2d_player_set_x_velocity(velocity);
+      gf2d_player_set_x_velocity(0);
       gf2d_tilemap_move_right(map);
+      gf2d_main_game_set_velocity_offset(cpv(-250,0));
     }
-    else if(gf2d_player_get_pos().x >=1180 && gf2d_tilemap_get_gp()==gf2d_tilemap_get_end_gp(map)*10)
+    else if(gf2d_player_get_pos().x >=860 && gf2d_tilemap_get_gp()==gf2d_tilemap_get_end_gp(map)*10)
     {
-      //slog("right2");
-      velocity.x = 150;
-      gf2d_player_set_x_velocity(velocity);
+      gf2d_player_set_x_velocity(speed*player->dir.x);
+      gf2d_main_game_set_velocity_offset(cpv(0,0));
     }
-    else if(gf2d_player_get_pos().x <1180)// && gf2d_tilemap_get_gp()!=gf2d_tilemap_get_end_gp(map))
+    else if(gf2d_player_get_pos().x <860)
     {
-      //slog("right3");
-      velocity.x = 150;
-      gf2d_player_set_x_velocity(velocity);
+      gf2d_player_set_x_velocity(speed*player->dir.x);
+      gf2d_main_game_set_velocity_offset(cpv(0,0));
     }
     else
     {
-      velocity.x = 0;
-      gf2d_player_set_x_velocity(velocity);
+      gf2d_player_set_x_velocity(0);
+      gf2d_main_game_set_velocity_offset(cpv(0,0));
     }
-    gf2d_player_set_right();
-  }
-  else
-  {
-    velocity.x = 0;
-    gf2d_player_set_x_velocity(velocity);
   }
 
-  if(gf2d_key_pressed(SDL_SCANCODE_UP))
-  {
-    velocity.y = -100;
-    gf2d_player_set_y_velocity(velocity);
-    gf2d_player_set_back();
-  }
-  else if(gf2d_key_pressed(SDL_SCANCODE_DOWN))
-  {
-    velocity.y = 100;
-    gf2d_player_set_y_velocity(velocity);
-    gf2d_player_set_forw();
-  }
-  else
-  {
-    velocity.y = 0;
-    gf2d_player_set_y_velocity(velocity);
-  }
+
+  player->lastUpdate =SDL_GetTicks();
+
+  //slog("the x velocity is %f",cpBodyGetVelocity(player->ent->body).x);
+  //slog("player->dist is %f",player->dist);
 }
 
 Player * gf2d_player_get_player(int ind)
@@ -438,7 +521,7 @@ cpShapeFilter gf2d_player_filter()
   cpBitmask cat;
   cpShapeFilter filter;
   group = 1;
-  mask = ENEMIES;
+  mask = ENEMIES|COIN;
   cat = PLAYER;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;

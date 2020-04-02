@@ -172,8 +172,8 @@ void gf2d_entity_close_entity(Entity *e)
   cpSpaceRemoveBody(space, e->body);
   cpShapeFree(e->shape);
   cpBodyFree(e->body);
-  if(e->colorShift)
-    free(e->colorShift);
+//  if(e->colorShift != NULL)
+  //  free(e->colorShift);
   //if(e->scale)
     //free(e->scale);
 }

@@ -16,7 +16,7 @@
 #define ENEMIES (1<<11)
 #define BEAM (1<<12)
 #define PROJECTILES (1<<13)
-
+#define COIN (1<<14)
 
 #include "chipmunk/chipmunk.h"
 #include "simple_logger.h"
@@ -35,5 +35,6 @@ cpBool gf2d_collision_handlers_proj_hit(cpArbiter *arb,cpSpace *space, void *dat
 void gf2d_collision_handlers_rock_enemy(cpSpace *space);
 void gf2d_collision_handlers_icicle_enemy(cpSpace *space);
 void gf2d_collision_handlers_fireball_enemy(cpSpace *space);
-
+void gf2d_collision_handlers_player_coin(cpSpace *space);
+cpBool gf2d_collision_handlers_pickup_coin(cpArbiter *arb,cpSpace *space, void *data);
 #endif

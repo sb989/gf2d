@@ -214,6 +214,7 @@ void gf2d_projectile_shoot(float speed,Projectile *proj)
   velocity.x = normal->x *speed;
   velocity.y = normal->y *speed;
   cpBodySetVelocity(proj->ent->body,velocity);
+  free(normal);
 }
 
 void gf2d_projectile_destroy(Projectile *proj)
@@ -228,6 +229,8 @@ void gf2d_projectile_destroy(Projectile *proj)
 
 void gf2d_projectile_set_rotation(Projectile *proj,Vector3D * rotation)
 {
+    if(proj->rotation)
+      free(proj->rotation);
     proj->rotation = rotation;
 }
 

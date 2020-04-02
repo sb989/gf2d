@@ -16,6 +16,8 @@ void gf2d_enemy_update(void *enemy);
 void gf2d_enemy_take_damage(int dmg,Entity *e);
 void gf2d_enemy_clear();
 void gf2d_enemy_draw(void *en);
+void gf2d_enemy_drop_coin(cpSpace *space, Entity *e, void *unused);
+cpShapeFilter gf2d_coin_filter();
 
 
 #endif

@@ -13,6 +13,7 @@ void gf2d_collision_handlers_add_all(cpSpace * space)
   gf2d_collision_handlers_rock_enemy(space);
   gf2d_collision_handlers_icicle_enemy(space);
   gf2d_collision_handlers_fireball_enemy(space);
+  gf2d_collision_handlers_player_coin(space);
 }
 
 void gf2d_collision_handlers_player_enemy(cpSpace *space)
@@ -56,7 +57,25 @@ void gf2d_collision_handlers_mouse_button(cpSpace * space)
   handler->separateFunc = (cpCollisionSeparateFunc)gf2d_collision_handlers_open_file_done;
 }
 
+void gf2d_collision_handlers_player_coin(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,PLAYER,COIN);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_pickup_coin;
+}
 
+cpBool gf2d_collision_handlers_pickup_coin(cpArbiter *arb,cpSpace *space, void *data)
+{
+  cpBody *body_a,*body_b;
+  //Player *p;
+  Entity *entB;
+  //slog("collision");
+  cpArbiterGetBodies(arb,&body_a,&body_b);
+
+  entB = (Entity*)cpBodyGetUserData(body_b);
+  entB->_inuse = 0;
+  return true;
+}
 
 cpBool gf2d_collision_handlers_proj_hit(cpArbiter *arb,cpSpace *space, void *data)
 {
@@ -82,6 +101,7 @@ cpBool gf2d_collision_handlers_proj_hit(cpArbiter *arb,cpSpace *space, void *dat
     gf2d_projectile_destroy(proj);
     gf2d_enemy_take_damage(5,entB);
   }
+  cpSpaceAddPostStepCallback(gf2d_physics_get_space(), (cpPostStepFunc)gf2d_enemy_drop_coin,entB, NULL);
   return true;
 }
 
@@ -105,7 +125,7 @@ cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *dat
   {
     //slog("player");
 
-    gf2d_main_game_set_box_color(vector4d(0,0,0,255));
+    //gf2d_main_game_set_box_color(vector4d(0,0,0,255));
     cpVect velocity;
     cpVect zero = {0,0};
     if(gf2d_player_get_player(0)->invincible > 0)
@@ -133,8 +153,7 @@ cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *dat
     gf2d_player_get_player(0)->invincible = 1;
     gf2d_player_get_player(0)->ent->colliding = 1;
     cpBodySetVelocity(gf2d_player_get_player(0)->ent->body,velocity);
-    //gf2d_player_set_force(force);
-    //cpBodySetForce(body_a,force);
+    gf2d_player_take_damage(1);
   }
 
   return 0;
@@ -144,7 +163,7 @@ cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *dat
 
 void gf2d_collision_handlers_set_white(cpArbiter * arb,cpSpace *space, void *data)
 {
-  gf2d_main_game_set_box_color(vector4d(255,255,255,255));
+  //gf2d_main_game_set_box_color(vector4d(255,255,255,255));
 
 
 }

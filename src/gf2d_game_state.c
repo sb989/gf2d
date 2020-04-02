@@ -1,6 +1,6 @@
 #include "gf2d_game_state.h"
 #include "simple_logger.h"
-enum state {game,main_menu,level_editor,load_level,pause_menu};
+enum state {game,main_menu,level_editor,load_level,pause_menu,game_over};
 static enum state gameState;
 static enum state oldState;
 enum updated {yes,no};
@@ -48,6 +48,9 @@ void gf2d_game_state_update()
           gf2d_main_game_close();
         }
         break;
+      case game_over:
+        gf2d_game_over_close();
+        break;
       default:
         break;
     }
@@ -73,6 +76,9 @@ void gf2d_game_state_update()
         break;
       case pause_menu:
         gf2d_pause_menu_init();
+        break;
+      case game_over:
+        gf2d_game_over_init();
         break;
       default:
         break;
@@ -122,5 +128,12 @@ void gf2d_game_state_set_pause_menu(void * nothing)
 {
   oldState = gameState;
   gameState = pause_menu;
+  update = yes;
+}
+
+void gf2d_game_state_set_game_over(void * nothing)
+{
+  oldState = gameState;
+  gameState = game_over;
   update = yes;
 }

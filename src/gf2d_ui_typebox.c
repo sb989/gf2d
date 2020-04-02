@@ -90,7 +90,7 @@ TypeBox * gf2d_ui_typebox_init_typebox(int height,int width,int posx,int posy, c
   temp->bi->boxInfo = box;
   temp->text_height = height*.8;
   gf2d_ui_button_setup_collision_body(temp->bi);
-  temp->sprite = gf2d_ui_textbox_load_sprite(temp->text,font_filename,height*.8);
+  temp->sprite = gf2d_ui_textbox_load_sprite(temp->text,font_filename,height*.8,vector4d(0,0,0,255));
   return temp;
 }
 
@@ -167,7 +167,7 @@ void gf2d_ui_typebox_update_text(TypeBox * tb,char * text)
   tb->char_count = strlength;
   height = tb->text_height;
   //slog("new text is %s",tb->text);
-  tb->sprite = gf2d_ui_textbox_load_sprite(tb->text,tb->font_filename,height);
+  tb->sprite = gf2d_ui_textbox_load_sprite(tb->text,tb->font_filename,height,vector4d(0,0,0,255));
 }
 
 void gf2d_ui_typebox_delete_text(TypeBox *tb)
@@ -183,7 +183,7 @@ void gf2d_ui_typebox_delete_text(TypeBox *tb)
   //strcat(tb->text,text);
   height = tb->text_height;
   //slog("new text is %s",tb->text);
-  tb->sprite = gf2d_ui_textbox_load_sprite(tb->text,tb->font_filename,height);
+  tb->sprite = gf2d_ui_textbox_load_sprite(tb->text,tb->font_filename,height,vector4d(0,0,0,255));
 }
 
 void gf2d_ui_typebox_clicked(void * self)

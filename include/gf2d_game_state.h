@@ -3,6 +3,7 @@
 #include "gf2d_main_menu.h"
 #include "gf2d_level_editor.h"
 #include "gf2d_main_game.h"
+#include "gf2d_game_over.h"
 void gf2d_game_state_init();
 void gf2d_game_state_update();
 int gf2d_game_state_get_state();
