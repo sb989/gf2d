@@ -250,6 +250,11 @@ int gf2d_tilemap_get_gp()
   return mapManager.gp;
 }
 
+void gf2d_tilemap_set_gp(int gp)
+{
+  mapManager.gp = gp;
+}
+
 void gf2d_tilemap_close()
 {
   int i,count;

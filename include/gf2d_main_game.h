@@ -15,6 +15,8 @@ int gf2d_main_game_get_paused();
 void gf2d_main_game_set_velocity_offset(cpVect vel);
 cpVect gf2d_main_game_get_velocity_offset();
 void gf2d_main_game_update_ui();
+void gf2d_main_game_load_levels_list(char *file_location);
+void gf2d_main_game_load_level(int n);
 
 
 #endif

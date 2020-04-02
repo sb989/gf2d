@@ -42,7 +42,7 @@ int gf2d_tilemap_get_tile_height();
 int gf2d_tilemap_get_gp();
 int gf2d_tilemap_get_end_gp(TileMap *map);
 void gf2d_player_movement(TileMap * map);
-
+void gf2d_tilemap_set_gp(int gp);
 
 
 #endif
