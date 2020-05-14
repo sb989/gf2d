@@ -1,5 +1,5 @@
 #include "gf2d_pause_menu.h"
-
+#include "game.h"
 void gf2d_pause_menu_init()
 {
   gf2d_ui_load("json_files/pause_menu.json");

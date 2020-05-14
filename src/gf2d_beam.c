@@ -164,7 +164,7 @@ void gf2d_beam_update_all()
 
 void gf2d_beam_update(Beam * b)
 {
-  Vector3D * rot;
+  //Vector3D * rot;
   float angle;
   float y,x;
   cpVect s_top,s_bot,e_top,e_bot;
@@ -174,7 +174,7 @@ void gf2d_beam_update(Beam * b)
   Vector2D playerPos = gf2d_player_get_pos();
   Vector2D mousePos = gf2d_mouse_pos();
 
-  rot = (Vector3D*)malloc(sizeof(Vector3D));
+  //rot = (Vector3D*)malloc(sizeof(Vector3D));
   y = (mousePos.y - (playerPos.y+ .5*gf2d_player_get_draw_height()));
   x = (mousePos.x - (playerPos.x+ .5*gf2d_player_get_draw_width()));
 
@@ -231,11 +231,16 @@ void gf2d_beam_update(Beam * b)
 	b->filter,
 	(cpSpaceSegmentQueryFunc)gf2d_beam_space_segment_query,b
   );
+  if(b->rotation == NULL)
+  {
+    b->rotation = (Vector3D*)malloc(sizeof(Vector3D));
+  }
 
-  rot->x =b->s->frame_w/2;
-  rot->y =b->s->frame_h/1;
-  rot->z = angle+b->offsetAngle;
-  gf2d_beam_set_rotation(b,rot);
+  b->rotation->x =b->s->frame_w/2;
+  b->rotation->y =b->s->frame_h/1;
+  b->rotation->z = angle+b->offsetAngle;
+  free(normal);
+  //gf2d_beam_set_rotation(b,rot);
 }
 
 void gf2d_beam_space_segment_query(cpShape *shape, cpFloat t, cpVect n, void *data)

@@ -79,8 +79,10 @@ void gf2d_ui_button_draw_all()
 }
 
 
-void gf2d_ui_button_set_func_name(SJson * value,ButtonInfo *tbi)
+
+void gf2d_ui_button_set_func_name_left(SJson * value,ButtonInfo *tbi)
 {
+  //gf2d_ui_button_set_func_name_temp(value,tbi,tbi->onReleaseName,tbi->onHoldName,tbi->onRelease_data,tbi->onHold_data,tbi->onRelease,tbi->onHold);
   char * onRelease,*onHold;
   char * onRelease_data,*onHold_data;
   Function * oh, * or;
@@ -117,6 +119,54 @@ void gf2d_ui_button_set_func_name(SJson * value,ButtonInfo *tbi)
   {
     tbi->onHold_data = NULL;
   }
+
+}
+
+void gf2d_ui_button_set_func_name_right(SJson * value,ButtonInfo *tbi)
+{
+    char * onRelease,*onHold;
+    char * onRelease_data,*onHold_data;
+    Function * oh, * or;
+    onRelease = gf2d_ui_helper_functions_get_object_value_as_string(value,"rightOnReleaseName");
+    tbi->rightOnReleaseName = onRelease;
+    or = gf2d_find_functions_find_func(onRelease);
+    if(or)
+      tbi->rightOnRelease = or->func;
+    else
+      tbi->rightOnRelease = NULL;
+    onRelease_data = gf2d_ui_helper_functions_get_object_value_as_string(value,"rightOnReleaseData");
+    if(!onRelease_data)
+      tbi->rightOnRelease_data = NULL;
+    else if(strcmp(onRelease_data,"NULL")== 0)
+     tbi->rightOnRelease_data = NULL;
+    else
+    {
+      tbi->rightOnRelease_data = NULL;
+    }
+
+    onHold = gf2d_ui_helper_functions_get_object_value_as_string(value,"rightOnHoldName");
+    tbi->rightOnHoldName = onHold;
+    oh = gf2d_find_functions_find_func(onHold);
+    if(oh)
+      tbi->rightOnHold = oh->func;
+    else
+      tbi->rightOnHold = NULL;
+    onHold_data = gf2d_ui_helper_functions_get_object_value_as_string(value,"rightOnHoldData");
+    if(!onHold_data)
+      tbi->rightOnHold_data = NULL;
+    else if(strcmp(onHold_data,"NULL")== 0)
+     tbi->rightOnHold_data = NULL;
+    else
+    {
+      tbi->rightOnHold_data = NULL;
+    }
+}
+
+
+void gf2d_ui_button_set_func_name(SJson * value,ButtonInfo *tbi)
+{
+  gf2d_ui_button_set_func_name_left(value,tbi);
+  gf2d_ui_button_set_func_name_right(value,tbi);
 }
 
 void gf2d_ui_button_sprite_init(SJson * value,ButtonInfo * tbi)
@@ -158,14 +208,15 @@ void gf2d_ui_button_setup_collision_body(ButtonInfo *b)
 {
   cpFloat length,width,radius;
   cpVect pos;
-  float x,y;
-  int resizex,resizey;
+  int x,y;
+  float resizex,resizey;
   cpShapeFilter filter = gf2d_ui_button_filter();
   resizex = b->boxInfo->resizex;
   resizey = b->boxInfo->resizey;
-  //slog("resizex is %d\tresizey is %d",resizex,resizey);
+  //slog("resizex is %f\tresizey is %f",resizex,resizey);
   length = b->boxInfo->height * resizey;
   width = b->boxInfo->width * resizex;
+  //slog("length is %f width is %f",length,width);
   radius = 0;
   b->shape = gf2d_physics_add_square_body(length,width,radius,0);
   b->body = cpShapeGetBody(b->shape);
@@ -231,6 +282,14 @@ ButtonInfo * gf2d_ui_button_new()
 
   temp->onHoldName = NULL;
   temp->onReleaseName = NULL;
+  temp->rightOnHoldName = NULL;
+  temp->rightOnReleaseName = NULL;
+
+  temp->onRelease = NULL;
+  temp->onHold = NULL;
+  temp->rightOnHold = NULL;
+  temp->rightOnRelease= NULL;
+
   temp->boxInfo = NULL;
   temp->s1 = NULL;
   temp->s2 = NULL;
@@ -255,6 +314,10 @@ void gf2d_ui_button_clear_list()
       free(temp->onHoldName);
     if(temp->onReleaseName)
       free(temp->onReleaseName);
+    if(temp->rightOnHoldName)
+      free(temp->rightOnHoldName);
+    if(temp->rightOnReleaseName)
+      free(temp->rightOnReleaseName);
     if(temp->shape && temp->body)
       gf2d_ui_button_free_body(temp);
     free(temp);
@@ -275,6 +338,10 @@ void gf2d_ui_button_close()
       free(temp->onHoldName);
     if(temp->onReleaseName)
       free(temp->onReleaseName);
+    if(temp->rightOnHoldName)
+      free(temp->rightOnHoldName);
+    if(temp->rightOnReleaseName)
+      free(temp->rightOnReleaseName);
     if(temp->shape && temp->body)
       gf2d_ui_button_free_body(temp);
     free(temp);

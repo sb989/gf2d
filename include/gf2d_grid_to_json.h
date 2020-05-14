@@ -4,7 +4,8 @@
 #include "gf2d_level_editor.h"
 #include "../Chipmunk-7.0.3/include/chipmunk/chipmunk.h"
 void gf2d_grid_to_json_create_json_grids(List * grids);
-SJson * gf2d_grid_to_json_create_json_cell(ButtonInfo * cell,int posx,int posy);
+SJson * gf2d_grid_to_json_create_json_cell(BoxInfo * cell,int posx,int posy);
+SJson * gf2d_grid_to_json_create_hitbox(int posx,int posy, int width,int height);
 
 
 

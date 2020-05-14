@@ -16,9 +16,9 @@
 #include "gf2d_game_state.h"
 #include "gf2d_enemy.h"
 #include "gf2d_main_game.h"
+#include "game.h"
 
 static int done = 0;
-
 void gf2d_game_set_done(int d)
 {
   done = d;
@@ -98,7 +98,6 @@ int main(int argc, char * argv[])
         gf2d_entity_animate_all();
         gf2d_beam_animate_all();
         gf2d_ui_update();
-        gf2d_entity_draw(m->animateData);
         // render current draw frame and skip to the next frame
         gf2d_game_state_update();
         gf2d_entity_update_all();
@@ -107,8 +106,10 @@ int main(int argc, char * argv[])
         {
           gf2d_level_editor_update();
         }
+        gf2d_entity_draw(m->animateData);
+
         gf2d_grahics_next_frame();
-        //if (gf2d_key_pressed(SDL_SCANCODE_ESCAPE))done = 1; // exit condition
+        if (gf2d_key_pressed(SDL_SCANCODE_ESCAPE))done = 1; // exit condition
         //slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
     }
     //free(temp);

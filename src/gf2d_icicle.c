@@ -68,7 +68,7 @@ cpShapeFilter gf2d_icicle_filter()
   cpBitmask cat;
   cpShapeFilter filter;
   group = 1;
-  mask = ENEMIES;
+  mask = ENEMIES|OBJECTS;
   cat = ICICLE;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;

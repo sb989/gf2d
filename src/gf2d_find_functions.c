@@ -39,11 +39,11 @@ Function * gf2d_find_functions_find_func(char * name)
         temp = gfc_list_get_nth(functions,i);
         if(strcmp(temp->name,name)==0)
         {
-          slog("found func %s",name);
+          //slog("found func %s",name);
           return temp;
         }
     }
-    slog("returning null when finding function");
+    //slog("returning null when finding function");
     return NULL;
 }
 

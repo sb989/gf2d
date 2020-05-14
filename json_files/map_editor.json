@@ -104,7 +104,32 @@
     "color.z":"245",
     "color.w":"255",
     "onReleaseName":"gf2d_game_state_set_main_menu"
+  },
+  {
+    "image_or_rect":"rect",
+    "posx":"1100",
+    "posy":"200",
+    "width":"70",
+    "height":"70",
+    "color.x":"80",
+    "color.y":"0",
+    "color.z":"255",
+    "color.w":"255",
+    "onReleaseName":"gf2d_level_editor_toggle_edit_mode"
+  },
+  {
+    "image_or_rect":"rect",
+    "posx":"1100",
+    "posy":"550",
+    "width":"70",
+    "height":"70",
+    "color.x":"80",
+    "color.y":"0",
+    "color.z":"255",
+    "color.w":"255",
+    "onReleaseName":"gf2d_level_editor_read_hitbox_params"
   }
+
 ],
 
 "typeboxes":[
@@ -132,6 +157,51 @@
     "font-filename":"fonts/Kenney Future Narrow.ttf",
     "posx":"625",
     "posy":"25",
+    "onReleaseName":"gf2d_ui_typebox_clicked",
+    "char_limit":"4"
+  },
+  {
+    "height":"30",
+    "width":"75",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1150",
+    "posy":"300",
+    "onReleaseName":"gf2d_ui_typebox_clicked",
+    "char_limit":"4"
+  },
+  {
+    "height":"30",
+    "width":"75",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1150",
+    "posy":"350",
+    "onReleaseName":"gf2d_ui_typebox_clicked",
+    "char_limit":"4"
+  },
+  {
+    "height":"30",
+    "width":"75",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1150",
+    "posy":"400",
+    "onReleaseName":"gf2d_ui_typebox_clicked",
+    "char_limit":"4"
+  },
+  {
+    "height":"30",
+    "width":"75",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1150",
+    "posy":"450",
+    "onReleaseName":"gf2d_ui_typebox_clicked",
+    "char_limit":"4"
+  },
+  {
+    "height":"30",
+    "width":"75",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1150",
+    "posy":"500",
     "onReleaseName":"gf2d_ui_typebox_clicked",
     "char_limit":"4"
   }
@@ -224,6 +294,483 @@
     "font-filename":"fonts/Kenney Future Narrow.ttf",
     "posx":"1020",
     "posy":"40"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"NAME",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"312"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"HEIGHT",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"362"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"WIDTH",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"412"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"POSX",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"462"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"POSY",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"512"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"TOGGLE",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"200"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"EDIT",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"212"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"MODE",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"224"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"CREATE",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"562"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"HITBOX",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1100",
+    "posy":"574"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"0",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"170",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"1",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"198",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"2",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"226",
+    "posy":"168"
+  },{
+    "height":"12",
+    "width":"50",
+    "text":"3",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"254",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"4",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"282",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"5",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"310",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"6",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"338",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"7",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"366",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"8",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"394",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"9",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"422",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"10",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"450",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"11",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"478",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"12",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"506",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"13",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"534",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"14",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"562",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"15",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"590",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"16",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"618",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"17",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"646",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"18",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"674",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"19",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"702",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"20",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"730",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"21",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"758",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"22",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"786",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"23",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"814",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"24",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"842",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"25",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"870",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"26",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"898",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"27",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"926",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"28",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"954",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"29",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"982",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"30",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1010",
+    "posy":"168"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"31",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"1038",
+    "posy":"168"
+  },{
+    "height":"12",
+    "width":"50",
+    "text":"0",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"180"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"1",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"208"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"2",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"236"
+  },{
+    "height":"12",
+    "width":"50",
+    "text":"3",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"264"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"4",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"292"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"5",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"320"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"6",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"348"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"7",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"376"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"8",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"404"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"9",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"432"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"10",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"460"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"11",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"488"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"12",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"516"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"13",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"544"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"14",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"572"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"15",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"600"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"16",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"628"
+  },
+  {
+    "height":"12",
+    "width":"50",
+    "text":"17",
+    "font-filename":"fonts/Kenney Future Narrow.ttf",
+    "posx":"155",
+    "posy":"656"
   }
 ]
 

@@ -11,7 +11,8 @@ typedef struct
   int startFrame,maxFrame,destStart,shadowFrame;
   Vector4D *colorShift;
   float offsetAngle;
-  Vector2D velocity;
+  Vector2D velocity,normal;
+  float speed;
   Vector2D originalPos;
   Vector3D * rotation;
   float xoffset,yoffset;

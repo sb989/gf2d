@@ -156,7 +156,7 @@ void gf2d_projectile_animate(void *projectile)
 
 void gf2d_projectile_update(void * projectile)
 {
-  cpVect pos;
+  cpVect pos,velocity;
   float magnitude;
   Projectile *proj = (Projectile*)projectile;
   if(proj->ent->_inuse == 0 || proj->destroy  ==1)
@@ -170,6 +170,10 @@ void gf2d_projectile_update(void * projectile)
   proj->ent->position.x = pos.x;
   proj->ent->position.y = pos.y;
   magnitude = vector2d_magnitude_between(proj->ent->position,proj->originalPos);
+  velocity.x = proj->normal.x *proj->speed;
+  velocity.y = proj->normal.y *proj->speed;
+  velocity = cpvadd(velocity,gf2d_main_game_get_velocity_offset());
+  cpBodySetVelocity(proj->ent->body,velocity);
 //  slog("original pos is %f %f",proj->originalPos.x,proj->originalPos.y);
 //  slog("current pos after update is %f %f",proj->ent->position.x,proj->ent->position.y);
   //slog("distance between start and current is %f",magnitude);
@@ -210,9 +214,11 @@ void gf2d_projectile_shoot(float speed,Projectile *proj)
   normal->x = x;
   normal->y = y;
   vector2d_normalize(normal);
-
+  proj->speed = speed;
+  proj->normal = (*normal);
   velocity.x = normal->x *speed;
   velocity.y = normal->y *speed;
+  velocity = cpvadd(velocity,gf2d_main_game_get_velocity_offset());
   cpBodySetVelocity(proj->ent->body,velocity);
   free(normal);
 }

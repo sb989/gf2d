@@ -14,6 +14,13 @@ void gf2d_collision_handlers_add_all(cpSpace * space)
   gf2d_collision_handlers_icicle_enemy(space);
   gf2d_collision_handlers_fireball_enemy(space);
   gf2d_collision_handlers_player_coin(space);
+
+  gf2d_collision_handlers_environment_coin(space);
+  gf2d_collision_handlers_environment_rock(space);
+  gf2d_collision_handlers_environment_icicle(space);
+  gf2d_collision_handlers_environment_fireball(space);
+  gf2d_collision_handlers_environment_enemy(space);
+  gf2d_collision_handlers_environment_player(space);
 }
 
 void gf2d_collision_handlers_player_enemy(cpSpace *space)
@@ -64,6 +71,47 @@ void gf2d_collision_handlers_player_coin(cpSpace *space)
   handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_pickup_coin;
 }
 
+void gf2d_collision_handlers_environment_coin(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,OBJECTS,COIN);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_environment_collision;
+}
+
+void gf2d_collision_handlers_environment_rock(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,OBJECTS,ROCK);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_environment_collision;
+}
+
+void gf2d_collision_handlers_environment_icicle(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,OBJECTS,ICICLE);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_environment_collision;
+}
+
+void gf2d_collision_handlers_environment_fireball(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,OBJECTS,FIREBALL);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_environment_collision;
+}
+
+void gf2d_collision_handlers_environment_player(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,OBJECTS,PLAYER);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_environment_collision;
+}
+void gf2d_collision_handlers_environment_enemy(cpSpace *space)
+{
+  cpCollisionHandler *handler;
+  handler = cpSpaceAddCollisionHandler(space,OBJECTS,ENEMIES);
+  handler->preSolveFunc = (cpCollisionPreSolveFunc)gf2d_collision_handlers_environment_collision;
+}
+
 cpBool gf2d_collision_handlers_pickup_coin(cpArbiter *arb,cpSpace *space, void *data)
 {
   cpBody *body_a,*body_b;
@@ -93,7 +141,7 @@ cpBool gf2d_collision_handlers_proj_hit(cpArbiter *arb,cpSpace *space, void *dat
   cpArbiterGetShapes(arb,&shape_a,&shape_b);
   a = cpShapeGetCollisionType(shape_a);
   b = cpShapeGetCollisionType(shape_b);
-  if((a == ROCK || a == ICICLE || a == FIREBALL)&& b == ENEMIES)
+  if((a == ROCK || a == ICICLE || a == FIREBALL)&& (b == ENEMIES || b == OBJECTS))
   {
     Projectile * proj = gf2d_projectile_get_proj_from_ent(entA);
     if(proj->destroy == 1)
@@ -123,9 +171,7 @@ cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *dat
   b = cpShapeGetCollisionType(shape_b);
   if(a==PLAYER && b==ENEMIES)
   {
-    //slog("player");
 
-    //gf2d_main_game_set_box_color(vector4d(0,0,0,255));
     cpVect velocity;
     cpVect zero = {0,0};
     if(gf2d_player_get_player(0)->invincible > 0)
@@ -159,7 +205,42 @@ cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *dat
   return 0;
 }
 
+cpBool gf2d_collision_handlers_environment_collision(cpArbiter *arb,cpSpace *space,void *data)
+{
+  cpBody *body_a,*body_b;
+  cpShape *shape_a,*shape_b;
+  cpCollisionType a,b;
+  //Player *p;
+  Entity *entB;
+  //slog("collision");
+  cpArbiterGetBodies(arb,&body_a,&body_b);
+  entB = (Entity*)cpBodyGetUserData(body_b);
+  if(entB->_inuse ==0)
+    return false;
+  cpArbiterGetShapes(arb,&shape_a,&shape_b);
+  a = cpShapeGetCollisionType(shape_a);
+  b = cpShapeGetCollisionType(shape_b);
 
+  if(a==OBJECTS)
+  {
+
+    cpVect velocity;
+    cpVect pos;
+    slog("push backk");
+    cpFloat factor = cpvlength(cpBodyGetVelocity(body_b));
+    factor = factor/60.0f;
+    pos = cpvnormalize(cpBodyGetVelocity(body_b));
+    pos = cpvneg(pos);
+    pos = cpvmult(pos,factor);
+    pos = cpvadd(pos,cpBodyGetPosition(body_b));
+    cpBodySetPosition(body_b,pos);
+    entB->colliding = 1;
+    velocity = cpv(0.f,0.f);
+    cpBodySetVelocity(body_b,velocity);
+  }
+
+  return 0;
+}
 
 void gf2d_collision_handlers_set_white(cpArbiter * arb,cpSpace *space, void *data)
 {
@@ -180,14 +261,26 @@ cpBool gf2d_collision_handlers_open_file(cpArbiter *arb,cpSpace *space,void *dat
 
   gf2d_controls_update();
 
+  //slog("colliding");
   if(gf2d_left_mouse_down() && butt->onHold)
   {
     butt->onHold(butt);
   }
   else if(gf2d_left_released() && butt->onRelease)
   {
+    //slog("calling thing");
     butt->onRelease(butt);
     gf2d_set_left_released(false);
+  }
+
+  if(gf2d_right_mouse_down() && butt->rightOnHold)
+  {
+    butt->rightOnHold(butt);
+  }
+  else if(gf2d_right_released() && butt->rightOnRelease)
+  {
+    butt->rightOnRelease(butt);
+    gf2d_set_right_released(false);
   }
 
   return 0;

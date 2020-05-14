@@ -54,14 +54,16 @@ void gf2d_main_game_load_level(int n)
   {
     xbound = 0;
   }
+  slog("the current lvl number is %d and the name is %s",n,map_name);
   currentLvl = n;
   map = gf2d_tilemap_load_json(map_name);
+  gf2d_enemy_clear();
   gf2d_enemy_init_enemy(vector2d(500,400),"green");
   gf2d_enemy_init_enemy(vector2d(340,40),"grey");
   gf2d_enemy_init_enemy(vector2d(700,400),"purple");
   gf2d_enemy_init_enemy(vector2d(600,500),"red");
   gf2d_enemy_init_enemy(vector2d(600,350),"blue");
-  gf2d_player_set_pos(vector2d(50,50));
+  gf2d_player_set_pos(vector2d(50,150));
   gf2d_tilemap_set_gp(0);
 }
 
@@ -77,7 +79,7 @@ cpVect gf2d_main_game_get_velocity_offset()
 
 void gf2d_main_game_draw()
 {
-  gf2d_tilemap_draw(map);
+  gf2d_tilemap_draw();
   //gf2d_enemy_draw_bb_all();
   //gf2d_player_animate();
 }
@@ -106,7 +108,7 @@ void gf2d_main_game_update()
 
   if(gf2d_key_pressed(SDL_SCANCODE_RETURN) && paused!=1 && gf2d_game_state_get_state() !=5)
   {
-    gf2d_game_state_set_pause_menu();
+    gf2d_game_state_set_pause_menu(NULL);
     gf2d_set_mouse_colliding(false);
     paused = 1;
   }
@@ -130,6 +132,7 @@ void gf2d_main_game_update()
     {
       if(gf2d_player_get_pos().x >=1280-xbound && gf2d_tilemap_get_gp()==gf2d_tilemap_get_end_gp(map)*10)
       {
+        gf2d_tilemap_clear();
         gf2d_main_game_load_level(currentLvl+1);
       }
     }

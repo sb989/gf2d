@@ -106,7 +106,7 @@ void gf2d_ui_typebox_update()
     selected = NULL;
     SDL_StopTextInput();
     firstUpdate = 0;
-    //gf2d_set_left_released(false);
+    gf2d_set_left_released(false);
 
   }
   else if( selected && e.type == SDL_KEYDOWN && e.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && strlen(selected->text)>0)
@@ -231,6 +231,7 @@ char * gf2d_ui_typebox_get_text(int ind)
 {
   char * text;
   text = (gf2d_ui_typebox_get_typebox(ind))->text;
+  //slog("typebox text:%s",text);
   return text;
 }
 

@@ -12,6 +12,8 @@ void gf2d_game_state_set_main_menu(void * nothing);
 void gf2d_game_state_set_level_editor(void * nothing);
 void gf2d_game_state_set_game(void * nothing);
 int gf2d_game_state_get_update();
+void gf2d_game_state_set_pause_menu(void * nothing);
+void gf2d_game_state_set_game_over(void * nothing);
 
 
 #endif

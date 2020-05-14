@@ -69,7 +69,7 @@ cpShapeFilter gf2d_fireball_filter()
   cpBitmask cat;
   cpShapeFilter filter;
   group = 1;
-  mask = ENEMIES;
+  mask = ENEMIES|OBJECTS;
   cat = FIREBALL;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;

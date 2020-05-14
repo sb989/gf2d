@@ -35,14 +35,14 @@ void gf2d_controls_manager_init()
 void gf2d_controls_update()
 {
   //slog("doing controls update");
-  SDL_PumpEvents();   // update SDL's internal event structures
+  //SDL_PumpEvents();   // update SDL's internal event structures
   cManager.keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
   SDL_PollEvent(&cManager.e);
   SDL_GetMouseState(&cManager.mx,&cManager.my);
-  if(cManager.mouseColliding == true)
-  {
+  //if(cManager.mouseColliding == true)
+//  {
     gf2d_update_mouse_state();
-  }
+  //}
 
 }
 
@@ -68,21 +68,20 @@ void gf2d_update_mouse_state()
   {
     if(cManager.e.type == SDL_MOUSEBUTTONDOWN)
     {
-      //slog("left mouse is down");
-      cManager.clickTime = SDL_GetTicks();
       cManager.lMouseDown = true;
+      slog("left is down");
     }
     else if(cManager.e.type==SDL_MOUSEBUTTONUP)
     {
       //slog("left mouse button is up");
       if(cManager.lMouseDown && !gf2d_left_released())
       {
-        //slog("left is being released");
+        slog("left is being released");
         gf2d_set_left_released(true);
-        cManager.releaseTime = SDL_GetTicks();
+        //cManager.releaseTime = SDL_GetTicks();
         cManager.lMouseDown = false;
       }
-      else if (cManager.lMouseDown && gf2d_left_released())
+      else if (!cManager.lMouseDown && gf2d_left_released() && !cManager.mouseColliding)
       {
         gf2d_set_left_released(false);
         cManager.lMouseDown = false;
@@ -111,7 +110,7 @@ void gf2d_update_mouse_state()
         gf2d_set_right_released(true);
         cManager.rMouseDown = false;
       }
-      else if (cManager.rMouseDown && gf2d_right_released())
+      else if (!cManager.rMouseDown && gf2d_right_released())
       {
         gf2d_set_right_released(false);
         cManager.rMouseDown = false;

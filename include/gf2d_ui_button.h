@@ -9,10 +9,19 @@ typedef struct
   BoxInfo * boxInfo;
   char *onReleaseName;
   char *onHoldName;
+  char *rightOnReleaseName;
+  char *rightOnHoldName;
+
   void (*onRelease)(void*);
   void (*onHold)(void*);
+  void (*rightOnRelease)(void*);
+  void (*rightOnHold)(void*);
+
   void *onRelease_data;
   void *onHold_data;
+  void *rightOnRelease_data;
+  void *rightOnHold_data;
+
   Sprite * s1;
   Sprite * s2;
   cpBody * body;

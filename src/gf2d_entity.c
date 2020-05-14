@@ -1,4 +1,5 @@
 #include "gf2d_entity.h"
+#include "gf2d_main_game.h"
 
 typedef struct
 {
@@ -117,6 +118,18 @@ void gf2d_entity_update(Entity * e)
     e->update(e->updateData);
 }
 
+void gf2d_entity_update_stationary(void *ent)
+{
+  cpVect vel;
+  Entity *e = (Entity *)ent;
+  cpVect pos = cpBodyGetPosition(e->body);
+  e->position.x = pos.x;
+  e->position.y = pos.y;
+  vel = gf2d_main_game_get_velocity_offset();
+  cpBodySetVelocity(e->body,vel);
+
+}
+
 void gf2d_entity_animate_all()
 {
   int i,count;
@@ -147,6 +160,7 @@ void gf2d_entity_animate(void *ent)
 void gf2d_entity_draw(void *ent)
 {
   Entity * e= (Entity*)ent;
+
   if(e->_inuse == 0)
     return;
   gf2d_sprite_draw(e->s,e->position,&(e->scale),NULL,NULL,NULL,NULL,e->colorShift,e->frame);//e->frame);

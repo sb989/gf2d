@@ -44,7 +44,7 @@ Projectile * gf2d_rock_new(int player)
 Projectile * gf2d_rock_shoot(int player)
 {
   Projectile * rock = gf2d_rock_init(player);
-  gf2d_projectile_shoot(100,rock);
+  gf2d_projectile_shoot(200,rock);
   return rock;
 }
 
@@ -68,7 +68,7 @@ cpShapeFilter gf2d_rock_filter()
   cpBitmask cat;
   cpShapeFilter filter;
   group = 1;
-  mask = ENEMIES;
+  mask = ENEMIES|OBJECTS;
   cat = ROCK;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;

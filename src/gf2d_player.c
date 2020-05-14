@@ -68,7 +68,7 @@ void gf2d_player_take_damage(int dmg)
   player->ent->hp = player->ent->hp - dmg;
   gf2d_main_game_update_ui();
   if(player->ent->hp == 0)
-    gf2d_game_state_set_game_over();
+    gf2d_game_state_set_game_over(NULL);
 }
 
 void gf2d_player_set_hp(int hp)
@@ -352,7 +352,7 @@ void gf2d_player_attack()
 void gf2d_player_movement(TileMap * map)
 {
   Vector2D velocity;
-  cpVect e_offset;
+  //cpVect e_offset;
   float y,x;
   Vector2D * normal;
   cpVect v = cpBodyGetVelocity(player->ent->body);
@@ -365,14 +365,20 @@ void gf2d_player_movement(TileMap * map)
   else
     timeD = 0;
 
-  if(player->ent->colliding == 1 && (fabs(v.x) > 50 || fabs(v.y) > 50))
+  if(player->ent->colliding >0 && (fabs(v.x) > 50 || fabs(v.y) > 50))
   {
-    cpBodySetVelocity(player->ent->body,cpvmult(v,.9));
+    cpBodySetVelocity(player->ent->body,cpvmult(v,.9/player->ent->colliding));
     return;
   }
-  else if(player->ent->colliding == 1 && (fabs(v.x) <= 50 || fabs(v.y) <= 50))
+  else if(player->ent->colliding >0 && (fabs(v.x) <= 50 || fabs(v.y) <= 50))
   {
     player->ent->colliding = 0;
+    gf2d_player_set_x_velocity(0);
+    gf2d_player_set_y_velocity(0);
+    player->dir.x = 0;
+    player->dir.y = 0;
+    player->dist = 0;
+    gf2d_main_game_set_velocity_offset(cpv(0,0));
   }
 
   gf2d_controls_update();
@@ -521,7 +527,7 @@ cpShapeFilter gf2d_player_filter()
   cpBitmask cat;
   cpShapeFilter filter;
   group = 1;
-  mask = ENEMIES|COIN;
+  mask = ENEMIES|COIN|OBJECTS;
   cat = PLAYER;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;

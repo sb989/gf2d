@@ -31,6 +31,7 @@ void gf2d_entity_update(Entity * e);
 Entity * gf2d_entity_new(char * name, Sprite *s,Vector2D pos,uint32_t CollisionType,cpShapeFilter filter,Vector2D scale,Vector2D collisionBoxDim);
 void gf2d_entity_manager_insert(Entity *e);
 void gf2d_entity_update_all();
+void gf2d_entity_update_stationary(void *ent);
 void gf2d_entity_init_manager();
 Entity * gf2d_entity_setup_collision_body(Entity *e,int length,int width,int radius, int type,uint32_t CollisionType,cpShapeFilter filter, Vector2D p);
 void gf2d_entity_close();

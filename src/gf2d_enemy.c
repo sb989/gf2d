@@ -116,6 +116,7 @@ void gf2d_enemy_drop_coin(cpSpace *space, Entity *e, void *unused)
   {
     Sprite *s = gf2d_sprite_load_all("images/coin.jpg",800,800,1);
     Entity * c = gf2d_entity_new("coin",s,e->position,COIN,gf2d_coin_filter(),vector2d(.01,.01),vector2d(.01*s->frame_w,.01*s->frame_h));
+    c->update = &gf2d_entity_update_stationary;
     c->_inuse = 1;
     c->colorShift = e->colorShift;
   }
@@ -160,14 +161,25 @@ void gf2d_enemy_update(void *enemy)
   //slog("moving enemy");
   cpVect pos = cpBodyGetPosition(e->body);
   cpVect playerPos = cpBodyGetPosition(gf2d_player_get_player(0)->ent->body);
+  if(cpvdist(pos,playerPos)<200)
+  {
+    vel = cpvsub(pos,playerPos);
+    vel = cpvnormalize(vel);
+    vel = cpvmult(vel,70);
+    vel = cpvneg(vel);
+    vel = cpvadd(vel,gf2d_main_game_get_velocity_offset());
+    cpBodySetVelocity(e->body,vel);
+  }
+  else
+  {
+    vel.x = 0;
+    vel.y = 0;
+    vel = cpvadd(vel,gf2d_main_game_get_velocity_offset());
+    cpBodySetVelocity(e->body,vel);
+  }
   e->position.x = pos.x;
   e->position.y = pos.y;
-  vel = cpvsub(pos,playerPos);
-  vel = cpvnormalize(vel);
-  vel = cpvmult(vel,70);
-  vel = cpvneg(vel);
-  vel = cpvadd(vel,gf2d_main_game_get_velocity_offset());
-  cpBodySetVelocity(e->body,vel);
+
   //slog("vel is %f %f",vel.x,vel.y);
 }
 
@@ -178,7 +190,7 @@ cpShapeFilter gf2d_enemy_filter()
   cpBitmask cat;
   cpShapeFilter filter;
   group = 2;
-  mask = PLAYER|LIGHTNING|FIRE|WIND|ROCK|WATER|FIREBALL|ICICLE;
+  mask = PLAYER|LIGHTNING|FIRE|WIND|ROCK|WATER|FIREBALL|ICICLE|OBJECTS;
   cat = ENEMIES;
   filter = cpShapeFilterNew(group,cat,mask);
   return filter;

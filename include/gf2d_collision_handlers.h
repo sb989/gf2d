@@ -23,18 +23,33 @@
 void gf2d_collision_handlers_add_all(cpSpace * space);
 void gf2d_collision_handlers_mouse_button(cpSpace * space);
 cpBool gf2d_collision_handlers_always_collide(cpArbiter *arb,cpSpace *space,void *data);
+
 cpBool gf2d_collision_handlers_open_file(cpArbiter *arb,cpSpace *space,void *data);
 cpBool gf2d_collision_handlers_test(cpArbiter *arb,cpSpace *space,void *data);
 void gf2d_collision_handlers_open_file_done(cpArbiter * arb,cpSpace *space, void *data);
+
 void gf2d_collision_handlers_player_enemy(cpSpace *space);
 void gf2d_collision_handlers_fire_enemy(cpSpace *space);
 void gf2d_collision_handlers_lightning_enemy(cpSpace *space);
 cpBool gf2d_collision_handlers_push_back(cpArbiter *arb,cpSpace *space,void *data);
+
 void gf2d_collision_handlers_set_white(cpArbiter * arb,cpSpace *space, void *data);
+
 cpBool gf2d_collision_handlers_proj_hit(cpArbiter *arb,cpSpace *space, void *data);
 void gf2d_collision_handlers_rock_enemy(cpSpace *space);
 void gf2d_collision_handlers_icicle_enemy(cpSpace *space);
 void gf2d_collision_handlers_fireball_enemy(cpSpace *space);
+
 void gf2d_collision_handlers_player_coin(cpSpace *space);
 cpBool gf2d_collision_handlers_pickup_coin(cpArbiter *arb,cpSpace *space, void *data);
+
+void gf2d_collision_handlers_environment_coin(cpSpace *space);
+void gf2d_collision_handlers_environment_rock(cpSpace *space);
+void gf2d_collision_handlers_environment_icicle(cpSpace *space);
+void gf2d_collision_handlers_environment_fireball(cpSpace *space);
+void gf2d_collision_handlers_environment_player(cpSpace *space);
+void gf2d_collision_handlers_environment_enemy(cpSpace *space);
+cpBool gf2d_collision_handlers_environment_collision(cpArbiter *arb,cpSpace *space,void *data);
+
+
 #endif
